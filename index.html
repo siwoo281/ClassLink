@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캠퍼스 헬퍼 - 배재대학교</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .nav-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0;
+            list-style: none;
+        }
+
+        .nav-link {
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Main Content Styles */
+        main {
+            padding: 40px 30px;
+        }
+
+        .section-hidden {
+            display: none !important;
+        }
+
+        section {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Dashboard (Quick Access) */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-card {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            background: linear-gradient(#f8f9ff, #f8f9ff) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 16px 14px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(118, 75, 162, 0.25);
+        }
+
+        .dashboard-card:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.35);
+        }
+
+        .dashboard-icon {
+            font-size: 2rem;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        /* Tablet/Desktop layout for dashboard */
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            .dashboard-card h3 {
+                font-size: 1.05rem;
+            }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-large {
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            margin: 20px auto;
+            display: block;
+        }
+
+        /* Time Buttons */
+        .time-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .time-btn {
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            color: #667eea;
+        }
+
+        .time-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        /* Card Styles */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card-content {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            min-height: 400px; /* 모바일 가로 차트에 충분한 높이 확보 */
+        }
+
+        #heatmap-chart {
+            max-height: 400px; /* 모바일에서 스크롤 방지 */
+        }
+
+        /* Roulette Result */
+        .roulette-result {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .roulette-result h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .roulette-result p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Search Container */
+        .search-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .search-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #0c5460;
+        }
+
+        .search-info p {
+            margin: 5px 0;
+        }
+
+        /* 교수님 시간표 스타일 */
+        .timetable-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            border: 2px solid #e1e8ed;
+            overflow-x: auto; /* 기본값: 필요 시 가로 스크롤 */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 시간표 자동 축소용 래퍼: 내부 그리드를 절대 위치로 두고, 래퍼 높이에 스케일 반영 */
+        .timetable-scale-wrap {
+            position: relative;
+            width: 100%;
+            overflow: hidden; /* 스케일 후 넘침 제거 */
+        }
+
+        .timetable-scale-wrap > .timetable-grid-30 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform-origin: top left;
+        }
+
+        .timetable-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .timetable-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* MOBILE-FIRST: 비율형 시간표 (30분 단위) - 그리드 유지 */
+        .timetable-grid-30 {
+            display: grid;
+            grid-template-columns: 60px repeat(5, minmax(120px, 1fr));
+            grid-template-rows: 44px repeat(18, var(--slot-height, 28px));
+            gap: 0;
+            background: #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #cfd4da;
+            min-width: 720px; /* 월~금 5열 + 시간 라벨 1열 기본 최소 너비 */
+        }
+
+        .timetable-header-cell,
+        .time-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .class-block {
+            background: white;
+            border: 2px solid #667eea;
+            border-left: 5px solid #667eea;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            background: linear-gradient(to right, #f8f9ff 0%, white 100%);
+        }
+
+        /* 모바일/데스크톱 공통: 블록 상단 라벨은 사용하지 않음 (헤더/라벨 그리드로 대체) */
+        .class-block::before { display: none; }
+
+        .class-block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            border-color: #764ba2;
+        }
+
+        .class-subject {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        .class-room {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .class-room::before {
+            content: "📍";
+            font-size: 0.9rem;
+        }
+
+        /* MOBILE-FIRST: 기존 고정 그리드 시간표 - 세로 리스트 */
+        .timetable-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: transparent;
+        }
+
+        .time-header,
+        .day-header {
+            display: none; /* 모바일에서는 헤더 숨김 */
+        }
+
+        .time-slot {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .time-slot.has-class {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-left: 4px solid #667eea;
+            transition: all 0.25s ease;
+        }
+
+        .time-slot.has-class:hover {
+            background: linear-gradient(135deg, #667eea25, #764ba225);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .timetable-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .timetable-stat {
+            background: white;
+            padding: 15px 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .timetable-stat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .timetable-stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .timetable-stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* DESKTOP: 가로 그리드 레이아웃 복원 (768px+) */
+        @media (min-width: 768px) {
+            .timetable-container {
+                padding: 30px;
+                max-width: 1100px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .timetable-header h3 {
+                font-size: 1.6rem;
+            }
+
+            .timetable-stats {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .timetable-stat {
+                padding: 18px 15px;
+            }
+
+            .timetable-stat-number {
+                font-size: 2rem;
+            }
+
+            .timetable-stat-label {
+                font-size: 0.9rem;
+            }
+
+            .timetable-grid-30 {
+                --slot-height: 40px; /* 데스크톱에서 더 넉넉한 높이 */
+            }
+
+            /* 비율형 시간표: 30분 그리드 복원 */
+            .timetable-grid-30 {
+                display: grid;
+                grid-template-columns: 90px repeat(5, 1fr);
+                grid-template-rows: 55px repeat(18, var(--slot-height, 45px));
+                gap: 0;
+                background: #dee2e6;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                border: 2px solid #adb5bd;
+            }
+
+            .timetable-header-cell,
+            .time-label {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 12px 8px;
+                font-weight: 700;
+                font-size: 1rem;
+                border-right: 1px solid rgba(255,255,255,0.2);
+                border-bottom: 1px solid rgba(255,255,255,0.2);
+            }
+
+            .timetable-header-cell:last-child {
+                border-right: none;
+            }
+
+            .time-label {
+                background: #f8f9fa;
+                color: #495057;
+                font-size: 0.9rem;
+                font-weight: 700;
+                border-right: 2px solid #dee2e6;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .class-block {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 12px 10px;
+                font-size: 0.9rem;
+                border-radius: 6px;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3),
+                            0 2px 8px rgba(0,0,0,0.15);
+                margin: 3px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .class-block:hover {
+                background: linear-gradient(135deg, #764ba2, #667eea);
+                box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5),
+                            0 4px 12px rgba(0,0,0,0.25);
+                transform: scale(1.02);
+                z-index: 10;
+                cursor: pointer;
+            }
+
+            /* 데스크톱: 요일/시간 라벨 숨김 (그리드로 표현) */
+            .class-block::before {
+                display: none;
+            }
+
+            .class-subject {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: white;
+                line-height: 1.3;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                word-break: keep-all;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                line-clamp: 2; /* 표준 속성 병기 */
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            .class-room {
+                font-size: 0.8rem;
+                color: rgba(255,255,255,0.95);
+                line-height: 1.4;
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 3px;
+            }
+
+            .class-room::before {
+                content: "📍";
+                margin-right: 2px;
+                font-size: 0.85rem;
+            }
+
+            .timetable-grid-30 {
+                --slot-height: 45px; /* 데스크톱에서 충분한 높이 */
+            }
+
+            /* 기존 고정 그리드 시간표: 가로 그리드 복원 */
+            .timetable-grid {
+                display: grid;
+                grid-template-columns: 100px repeat(5, 1fr);
+                gap: 1px;
+                background: #e1e8ed;
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .time-header,
+            .day-header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                padding: 15px 10px;
+                font-weight: 600;
+                color: #495057;
+            }
+
+            .time-slot {
+                background: white;
+                min-height: 60px;
+                border: none;
+                border-radius: 0;
+                padding: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.9rem;
+                font-weight: 500;
+                box-shadow: none;
+            }
+
+            .time-slot.has-class {
+                background: linear-gradient(135deg, #667eea20, #764ba220);
+                border-left: 4px solid #667eea;
+                flex-direction: column;
+                cursor: pointer;
+            }
+
+            .time-slot.has-class:hover {
+                background: linear-gradient(135deg, #667eea40, #764ba240);
+                transform: scale(1.02);
+            }
+
+            .class-subject {
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-align: center;
+                margin-bottom: 4px;
+            }
+
+            .class-room {
+                font-size: 0.75rem;
+                text-align: center;
+            }
+
+            /* 데스크톱: 차트 컨테이너 최적화 */
+            .chart-container {
+                padding: 30px;
+                min-height: 450px;
+            }
+
+            #heatmap-chart {
+                max-height: 500px;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            main {
+                padding: 30px 20px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .time-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            /* 모바일에서는 가로 스크롤을 없애고(기본은 숨김), 자동 축소로 한 화면에 맞춤 */
+            .timetable-container {
+                overflow-x: hidden;
+            }
+
+            /* 모바일에서 그리드 기본 글자 크기 약간 축소 (스케일 전 가독성 보정) */
+            .class-subject { font-size: 0.95rem; }
+            .class-room { font-size: 0.8rem; }
+        }
+
+        /* Tablet/Desktop layout for dashboard */
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            .dashboard-card h3 {
+                font-size: 1.05rem;
+            }
+            .timetable-grid-30 {
+                --slot-height: 34px; /* 조금 더 넉넉한 높이 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="nav-container">
+                <div class="nav-brand" data-target="home" style="cursor: pointer;">🏫 캠퍼스 헬퍼</div>
+                <button id="menu-toggle" aria-label="메뉴 열기">☰</button>
+                <ul class="nav-links">
+                    <li><a class="nav-link active" data-target="home">🏠 실시간 현황</a></li>
+                    <li><a class="nav-link" data-target="search">🔍 빈 강의실 검색</a></li>
+                    <li><a class="nav-link" data-target="schedule">🗓️ 스케줄 조회</a></li>
+                    <li><a class="nav-link" data-target="heatmap">📊 캠퍼스 혼잡도</a></li>
+                    <li><a class="nav-link" data-target="roulette">🍔 점심 룰렛</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main>
+            <!-- 실시간 현황 섹션 -->
+            <section id="home">
+                <div class="dashboard-grid">
+                    <a class="dashboard-card" data-target="search">
+                        <div class="dashboard-icon">🔍</div>
+                        <h3>빈 강의실 검색</h3>
+                    </a>
+                    <a class="dashboard-card" data-target="schedule">
+                        <div class="dashboard-icon">🗓️</div>
+                        <h3>스케줄 조회</h3>
+                    </a>
+                    <a class="dashboard-card" data-target="heatmap">
+                        <div class="dashboard-icon">📊</div>
+                        <h3>캠퍼스 혼잡도</h3>
+                    </a>
+                    <a class="dashboard-card" data-target="roulette">
+                        <div class="dashboard-icon">🍔</div>
+                        <h3>점심 룰렛</h3>
+                    </a>
+                </div>
+                <h1 class="section-title">📊 실시간 캠퍼스 현황</h1>
+                <div class="stats-container" id="current-stats">
+                    <!-- 통계 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+                <div class="card-grid" id="current-rooms">
+                    <!-- 현재 상황 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </section>
+
+            <!-- 빈 강의실 검색 섹션 -->
+            <section id="search" class="section-hidden">
+                <h1 class="section-title">🔍 빈 강의실 검색</h1>
+                <div class="search-container">
+                    <div class="search-form">
+                        <div class="form-group">
+                            <label for="day-select">📅 요일 선택</label>
+                            <select id="day-select">
+                                <option value="">요일을 선택하세요</option>
+                                <option value="MON">월요일</option>
+                                <option value="TUE">화요일</option>
+                                <option value="WED">수요일</option>
+                                <option value="THU">목요일</option>
+                                <option value="FRI">금요일</option>
+                                <option value="SAT">토요일</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⏰ 시간 선택</label>
+                            <div class="time-buttons">
+                                <button type="button" class="time-btn" data-time="09:00">1교시 (09:00)</button>
+                                <button type="button" class="time-btn" data-time="10:00">2교시 (10:00)</button>
+                                <button type="button" class="time-btn" data-time="11:00">3교시 (11:00)</button>
+                                <button type="button" class="time-btn" data-time="13:00">4교시 (13:00)</button>
+                                <button type="button" class="time-btn" data-time="14:00">5교시 (14:00)</button>
+                                <button type="button" class="time-btn" data-time="15:00">6교시 (15:00)</button>
+                                <button type="button" class="time-btn" data-time="16:00">7교시 (16:00)</button>
+                                <button type="button" class="time-btn" data-time="18:00">야간 (18:00)</button>
+                            </div>
+                            <input type="time" id="time-select" value="09:00">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn" id="search-button">🔍 검색</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-grid" id="search-results">
+                    <!-- 검색 결과가 여기에 표시됩니다 -->
+                </div>
+            </section>
+
+            <!-- 스케줄 조회 섹션 -->
+            <section id="schedule" class="section-hidden">
+                <h1 class="section-title">🗓️ 스케줄 조회</h1>
+                <div class="search-container">
+                    <div class="search-form">
+                        <div class="form-group">
+                            <label for="schedule-type">검색 타입</label>
+                            <select id="schedule-type">
+                                <option value="department">학과별 검색</option>
+                                <option value="professor">교수별 검색</option>
+                                <option value="classroom">강의실별 검색</option>
+                                <option value="subject">과목명 검색</option>
+                                <option value="professor-timetable">교수님 시간표</option>
+                                <option value="missing-professor">교수명 누락 강의</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="search-input-group">
+                            <label for="schedule-query">검색어</label>
+                            <input type="text" id="schedule-query" placeholder="검색어를 입력하세요">
+                        </div>
+                        <div class="form-group" id="professor-select-group" style="display: none;">
+                            <label for="professor-select">교수님 선택</label>
+                            <select id="professor-select">
+                                <option value="">교수님을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="schedule-day-filter">요일 필터</label>
+                            <select id="schedule-day-filter">
+                                <option value="">전체 요일</option>
+                                <option value="MON">월요일</option>
+                                <option value="TUE">화요일</option>
+                                <option value="WED">수요일</option>
+                                <option value="THU">목요일</option>
+                                <option value="FRI">금요일</option>
+                                <option value="SAT">토요일</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn" id="schedule-search-button">🔍 검색</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-grid" id="schedule-results">
+                    <!-- 스케줄 검색 결과가 여기에 표시됩니다 -->
+                </div>
+                <div class="card-grid" id="online-courses-list">
+                    <!-- 온라인 강의 목록이 여기에 표시됩니다 -->
+                </div>
+            </section>
+
+            <!-- 캠퍼스 혼잡도 섹션 -->
+            <section id="heatmap" class="section-hidden">
+                <h1 class="section-title">📊 캠퍼스 혼잡도</h1>
+                <div class="chart-container">
+                    <canvas id="heatmap-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- 점심 룰렛 섹션 -->
+            <section id="roulette" class="section-hidden">
+                <h1 class="section-title">🍔 점심 룰렛</h1>
+                <div style="text-align: center;">
+                    <p style="font-size: 1.2rem; margin-bottom: 30px; color: #666;">
+                        오늘 점심 메뉴를 정하지 못하셨나요?<br>
+                        룰렛을 돌려서 맛있는 점심을 추천받아보세요!
+                    </p>
+                    <button class="btn btn-large" id="roulette-button">🎰 룰렛 돌리기</button>
+                </div>
+                <div id="roulette-result"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // ===== 데이터 정의 =====
+        // 배재대학교 2025학년도 2학기 실제 강의 시간표 데이터
+        let timetableData = [];
+        let professorsList = [];
+
+        // 건물 코드 → 표준 건물명 매핑 (개설강좌 리스트 기준)
+        const BUILDING_NAME_MAP = {
+            "505": "505관",
+            "A": "아펜젤러관",
+            "AM": "아펜젤러기념관",
+            "AU": "AU관",
+            "B": "백산관",
+            "C": "C관",
+            "DC": "대덕산학협력관",
+            "DS": "대덕산학협력관",
+            "F": "서재필관",
+            "G": "국제교류관",
+            "H": "하워드관",
+            "HM": "하워드기념관",
+            "J": "J관",
+            "JU": "J관지하",
+            "K": "김옥균관",
+            "MC": "M동",
+            "P": "21세기관",
+            "PAU": "국제언어생활관지하",
+            "PU": "21세기관지하",
+            "S": "소월관",
+            "SP": "SMART배재관",
+            "W": "우남관",
+            "Y": "Y관",
+            "ZY": "ZY관"
+        };
+
+        // 표시용: 교수명 배열 필드가 있으면 우선 사용
+        function getProfessorDisplay(item) {
+            if (Array.isArray(item.professors) && item.professors.length > 0) {
+                return item.professors.join(', ');
+            }
+            return item.professor || '';
+        }
+
+        function getRoomDisplay(item) {
+            if (item.day === 'ONLINE' || String(item.type||'').toLowerCase() === 'online') {
+                return '온라인';
+            }
+            const b = (item.building_name || '').trim();
+            const r = (item.classroom || '').trim();
+            if (b && r) return `${b} ${r}`;
+            if (b) return b;
+            if (r) return r;
+            return '-';
+        }
+
+    // JSON 파일에서 데이터 로드
+    async function loadTimetableData() {
+            try {
+                // 공식 데이터 소스: timetable_project.json 사용
+                const response = await fetch('timetable_project.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const raw = await response.json();
+
+                // 정규화 및 건물명 교체: building_code 기준으로 표준 건물명 적용
+                timetableData = raw.map(item => {
+                    const code = (item.building_code || '').trim();
+                    const correctedName = BUILDING_NAME_MAP[code] || (item.building_name || '').trim();
+                    // start/end 없고 time만 있는 레코드는 분리
+                    let start = item.start, end = item.end;
+                    if ((!start || !end) && item.time && item.time.includes('-')) {
+                        const [s, e] = item.time.split('-');
+                        start = (s || '').trim();
+                        end = (e || '').trim();
+                    }
+                    return { ...item, building_name: correctedName, start, end };
+                });
+                
+                // 교수님 목록 생성 (이름이 있는 경우만)
+                const professorsSet = new Set();
+                let missingProfessorCount = 0;
+                
+                timetableData.forEach(item => {
+                    const single = (item.professor || '').trim();
+                    const multi = Array.isArray(item.professors) ? item.professors : [];
+                    
+                    // professors 배열이 있으면 우선 사용
+                    if (multi.length > 0) {
+                        multi.forEach(name => {
+                            const n = String(name || '').trim();
+                            if (n && !['01','02','03','04','05','06','07','08','09','10'].includes(n)) {
+                                professorsSet.add(n);
+                            }
+                        });
+                    }
+                    // single professor 필드 사용 (분반 번호 제외)
+                    if (single && !['','01','02','03','04','05','06','07','08','09','10'].includes(single)) {
+                        professorsSet.add(single);
+                    }
+                    
+                    // 둘 다 없으면 누락
+                    if (!single && multi.length === 0) {
+                        missingProfessorCount++;
+                    }
+                });
+                professorsList = Array.from(professorsSet).sort();
+                
+                console.log(`교수님 이름 누락된 강의: ${missingProfessorCount}개`);
+                
+                // 교수님 드롭다운 채우기
+                populateProfessorDropdown();
+                
+                const onlineCount = timetableData.filter(i => i.day === 'ONLINE' || (i.type || '').toLowerCase() === 'online').length;
+                console.log(`시간표 데이터 로드 완료: ${timetableData.length}개 강의, ${professorsList.length}명 교수 (온라인 ${onlineCount}개)`);
+                
+                // 데이터 로드 후 현재 섹션 다시 초기화
+                const activeNavLink = document.querySelector('.nav-link.active');
+                if (activeNavLink) {
+                    const currentSection = activeNavLink.getAttribute('data-target');
+                    initializeSection(currentSection);
+                }
+            } catch (error) {
+                console.error('시간표 데이터 로드 실패:', error);
+                // 에러 발생 시 빈 배열로 설정
+                timetableData = [];
+                alert('시간표 데이터를 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.');
+            }
+        }
+
+        // 배재대학교 주변 맛집 데이터 (예시)
+        const restaurantsData = [
+            { "name": "배재학식당", "category": "한식", "menu": "김치찌개, 된장찌개, 불고기정식" },
+            { "name": "대전 명동칼국수", "category": "한식", "menu": "칼국수, 만두, 비빔국수" },
+            { "name": "청춘반점", "category": "중식", "menu": "짜장면, 짬뽕, 탕수육" },
+            { "name": "홍콩반점", "category": "중식", "menu": "볶음밥, 깐풍기, 유린기" },
+            { "name": "돈까스 명가", "category": "일식", "menu": "등심돈까스, 치즈돈까스, 우동" },
+            { "name": "초밥의달인", "category": "일식", "menu": "모듬초밥, 연어초밥, 회덮밥" },
+            { "name": "맘스터치 배재대점", "category": "패스트푸드", "menu": "싸이버거, 치킨버거, 감자튀김" },
+            { "name": "맥도날드 대전용문점", "category": "패스트푸드", "menu": "빅맥, 새우버거, 맥너겟" },
+            { "name": "커피베네 배재대점", "category": "카페", "menu": "아메리카노, 카페라떼, 샌드위치" },
+            { "name": "스타벅스 대전용문점", "category": "카페", "menu": "아메리카노, 프라푸치노, 머핀" },
+            { "name": "교촌치킨 용문점", "category": "치킨", "menu": "허니콤보, 레드콤보, 간장치킨" },
+            { "name": "네네치킨 대전용문점", "category": "치킨", "menu": "양념치킨, 후라이드, 반반치킨" },
+            { "name": "피자헛 대전용문점", "category": "피자", "menu": "슈퍼슈프림, 불고기피자, 콤비네이션" },
+            { "name": "도미노피자 용문점", "category": "피자", "menu": "페퍼로니, 포테이토, 치즈피자" },
+            { "name": "국밥천국", "category": "한식", "menu": "순대국밥, 돼지국밥, 내장국밥" },
+            { "name": "용문갈비집", "category": "한식", "menu": "갈비탕, 갈비구이, 냉면" },
+            { "name": "분식천국", "category": "분식", "menu": "떡볶이, 김밥, 순대" },
+            { "name": "24시간 김밥천국", "category": "분식", "menu": "참치김밥, 제육김밥, 라면" },
+            { "name": "파스타클럽", "category": "양식", "menu": "크림파스타, 토마토파스타, 리조또" },
+            { "name": "쉐프의정원", "category": "양식", "menu": "스테이크, 파스타, 샐러드" }
+        ];
+
+        // ===== 3.1. SPA 내비게이션 로직 =====
+        document.addEventListener('DOMContentLoaded', async function() {
+            // JSON 데이터 먼저 로드
+            await loadTimetableData();
+            
+            // 햄버거 메뉴 토글
+            const menuToggle = document.getElementById('menu-toggle');
+            const nav = document.querySelector('nav');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    nav.classList.toggle('nav-open');
+                });
+            }
+            
+            // 로고 클릭 시 홈으로 이동
+            const navBrand = document.querySelector('.nav-brand');
+            if (navBrand) {
+                navBrand.addEventListener('click', function() {
+                    // 홈 링크 찾아서 클릭 이벤트 트리거
+                    const homeLink = document.querySelector('[data-target="home"]');
+                    if (homeLink && homeLink.classList.contains('nav-link')) {
+                        homeLink.click();
+                    }
+                });
+            }
+            
+            // 내비게이션 링크 이벤트 리스너
+            const navLinks = document.querySelectorAll('[data-target]');
+            const sections = document.querySelectorAll('section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('data-target');
+
+                    // 모바일: 메뉴 닫기
+                    if (nav) {
+                        nav.classList.remove('nav-open');
+                    }
+
+                    // 모든 섹션 숨기기
+                    sections.forEach(section => {
+                        section.classList.add('section-hidden');
+                    });
+
+                    // 모든 링크에서 active 클래스 제거
+                    navLinks.forEach(navLink => {
+                        navLink.classList.remove('active');
+                    });
+
+                    // 선택된 섹션 보이기
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.classList.remove('section-hidden');
+                    }
+
+                    // 선택된 링크에 active 클래스 추가
+                    this.classList.add('active');
+
+                    // 섹션별 초기화 함수 호출
+                    initializeSection(targetId);
+                });
+            });
+
+            // 초기 로드 시 홈 섹션 초기화
+            initializeSection('home');
+            initializeSearchSection();
+            initializeScheduleSection();
+            initializeRouletteSection();
+        });
+
+        // ===== 3.2. 기능 1: 실시간 현황 (Home) =====
+        function initializeSection(sectionId) {
+            switch(sectionId) {
+                case 'home':
+                    updateRealTimeStatus();
+                    break;
+                case 'heatmap':
+                    renderHeatmapChart();
+                    break;
+            }
+        }
+
+        function updateRealTimeStatus() {
+            // 데이터가 아직 로드되지 않았으면 로딩 표시
+            if (!timetableData || timetableData.length === 0) {
+                const statsContainer = document.getElementById('current-stats');
+                const roomsContainer = document.getElementById('current-rooms');
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">⏳</div>
+                        <div class="stat-label">데이터 로딩 중...</div>
+                    </div>
+                `;
+                
+                roomsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">📊 데이터를 불러오는 중입니다</div>
+                        <div class="card-content">잠시만 기다려주세요...</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = new Date();
+            const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const currentDay = dayNames[now.getDay()];
+            const currentTime = now.getHours().toString().padStart(2, '0') + ':' + 
+                               now.getMinutes().toString().padStart(2, '0');
+
+            // 현재 사용 중인 강의실 계산
+            const occupiedRooms = timetableData.filter(item => {
+                return item.day === currentDay && 
+                       currentTime >= item.start && 
+                       currentTime < item.end;
+            });
+
+            // 전체 강의실 목록
+            const allRooms = [...new Set(timetableData
+                .map(item => `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`)
+                .filter(key => key !== '-')
+            )];
+
+            // 빈 강의실 계산
+            const occupiedRoomKeys = occupiedRooms.map(item => 
+                `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`
+            );
+            const emptyRoomsCount = allRooms.length - occupiedRoomKeys.length;
+
+            // 통계 카드 렌더링
+            const statsContainer = document.getElementById('current-stats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${occupiedRooms.length}</div>
+                    <div class="stat-label">사용 중인 강의실</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${emptyRoomsCount}</div>
+                    <div class="stat-label">빈 강의실</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${allRooms.length}</div>
+                    <div class="stat-label">전체 강의실</div>
+                </div>
+            `;
+
+            // 현재 진행 중인 강의 카드 렌더링
+            const roomsContainer = document.getElementById('current-rooms');
+            if (occupiedRooms.length > 0) {
+                const roomCards = occupiedRooms.map(room => `
+                    <div class="card">
+                        <div class="card-title">🏛️ ${getRoomDisplay(room)}</div>
+                        <div class="card-content">
+                            <strong>${room.subject}</strong><br>
+                            👨‍🏫 ${getProfessorDisplay(room)}<br>
+                            🏫 ${room.department}<br>
+                            ⏰ ${room.start} - ${room.end}
+                        </div>
+                    </div>
+                `).join('');
+                roomsContainer.innerHTML = roomCards;
+            } else {
+                roomsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">😴 현재 진행 중인 강의가 없습니다</div>
+                        <div class="card-content">
+                            현재 시간에는 모든 강의실이 비어있습니다.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ===== 3.3. 기능 2: 빈 강의실 검색 (Search) =====
+        function initializeSearchSection() {
+            const searchButton = document.getElementById('search-button');
+            const timeButtons = document.querySelectorAll('.time-btn');
+            const timeSelect = document.getElementById('time-select');
+
+            // 시간 버튼 이벤트
+            timeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    timeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    timeSelect.value = this.dataset.time;
+                });
+            });
+
+            // 검색 버튼 이벤트
+            searchButton.addEventListener('click', function() {
+                const selectedDay = document.getElementById('day-select').value;
+                const selectedTime = timeSelect.value;
+
+                if (!selectedDay) {
+                    alert('요일을 선택해주세요.');
+                    return;
+                }
+
+                if (!selectedTime) {
+                    alert('시간을 선택해주세요.');
+                    return;
+                }
+
+                searchEmptyClassrooms(selectedDay, selectedTime);
+            });
+        }
+
+        function searchEmptyClassrooms(selectedDay, selectedTime) {
+            // 데이터가 아직 로드되지 않았으면 경고
+            if (!timetableData || timetableData.length === 0) {
+                const resultsContainer = document.getElementById('search-results');
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">⏳ 데이터를 불러오는 중입니다</div>
+                        <div class="card-content">잠시 후 다시 시도해주세요.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 선택된 시간에 사용 중인 강의실
+            const occupiedRooms = timetableData.filter(item => {
+                return item.day === selectedDay && 
+                       selectedTime >= item.start && 
+                       selectedTime < item.end;
+            });
+
+            const occupiedRoomKeys = occupiedRooms.map(item => 
+                `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`
+            );
+
+            // 전체 강의실에서 사용 중인 강의실 제외
+            const allRoomsData = timetableData.reduce((acc, item) => {
+                const key = `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        classroom: item.classroom,
+                        building_name: item.building_name
+                    };
+                }
+                return acc;
+            }, {});
+
+            const emptyRooms = Object.entries(allRoomsData)
+                .filter(([key]) => !occupiedRoomKeys.includes(key))
+                .map(([key, data]) => data);
+
+            // 결과 렌더링
+            const resultsContainer = document.getElementById('search-results');
+            const dayNames = {
+                'MON': '월요일', 'TUE': '화요일', 'WED': '수요일',
+                'THU': '목요일', 'FRI': '금요일', 'SAT': '토요일'
+            };
+
+            if (emptyRooms.length > 0) {
+                const roomCards = emptyRooms.map(room => `
+                    <div class="card">
+                        <div class="card-title">🏛️ ${getRoomDisplay(room)}</div>
+                        <div class="card-content">
+                            ⏰ ${dayNames[selectedDay]} ${selectedTime}
+                        </div>
+                    </div>
+                `).join('');
+                resultsContainer.innerHTML = roomCards;
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">😔 빈 강의실이 없습니다</div>
+                        <div class="card-content">
+                            해당 시간에는 모든 강의실이 사용 중입니다.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 교수님 드롭다운 채우기
+        function populateProfessorDropdown() {
+            const professorSelect = document.getElementById('professor-select');
+            if (!professorSelect || professorsList.length === 0) return;
+            
+            // 기존 옵션들 제거 (첫 번째 기본 옵션 제외)
+            professorSelect.innerHTML = '<option value="">교수님을 선택하세요</option>';
+            
+            // 교수님들을 드롭다운에 추가
+            professorsList.forEach(professor => {
+                const option = document.createElement('option');
+                option.value = professor;
+                option.textContent = professor;
+                professorSelect.appendChild(option);
+            });
+        }
+
+        // 검색 타입에 따라 UI 토글
+        function toggleSearchUI() {
+            const searchType = document.getElementById('schedule-type').value;
+            const searchInputGroup = document.getElementById('search-input-group');
+            const professorSelectGroup = document.getElementById('professor-select-group');
+            
+            if (searchType === 'professor-timetable') {
+                searchInputGroup.style.display = 'none';
+                professorSelectGroup.style.display = 'block';
+            } else if (searchType === 'missing-professor') {
+                // 교수명 누락 강의는 검색어 입력 불필요
+                searchInputGroup.style.display = 'none';
+                professorSelectGroup.style.display = 'none';
+            } else {
+                searchInputGroup.style.display = 'block';
+                professorSelectGroup.style.display = 'none';
+            }
+        }
+
+        // ===== 3.4. 기능 3: 스케줄 조회 (Schedule) =====
+        function initializeScheduleSection() {
+            const searchButton = document.getElementById('schedule-search-button');
+            const searchQuery = document.getElementById('schedule-query');
+            const searchType = document.getElementById('schedule-type');
+            
+            function performSearch() {
+                const type = searchType.value;
+                if (type === 'professor-timetable') {
+                    const selectedProfessor = document.getElementById('professor-select').value;
+                    if (selectedProfessor) {
+                        showProfessorTimetable(selectedProfessor);
+                    }
+                } else if (type === 'missing-professor') {
+                    // 교수명 누락 강의는 검색어 없이 바로 검색
+                    searchSchedule(type, '');
+                } else {
+                    const query = searchQuery.value.trim();
+                    searchSchedule(type, query);
+                }
+            }
+            
+            searchButton.addEventListener('click', performSearch);
+            
+            // Enter 키로 검색 실행
+            searchQuery.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // 검색 타입 변경 시 UI 토글
+            searchType.addEventListener('change', toggleSearchUI);
+            
+            // 초기 UI 설정
+            toggleSearchUI();
+        }
+
+        // 교수님 시간표 표시
+    function showProfessorTimetable(professorName) {
+            if (!timetableData || timetableData.length === 0) {
+                const resultsContainer = document.getElementById('schedule-results');
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">⏳ 데이터를 불러오는 중입니다</div>
+                        <div class="card-content">잠시 후 다시 시도해주세요.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 해당 교수님의 강의 필터링 (교수님 이름이 정확히 일치하는 경우만)
+            const professorClasses = timetableData.filter(item => {
+                const p = item.professor && item.professor.trim();
+                const ps = Array.isArray(item.professors) ? item.professors.map(x => (x || '').trim()).filter(Boolean) : [];
+                return (p && p === professorName) || ps.includes(professorName);
+            });
+
+            if (professorClasses.length === 0) {
+                const resultsContainer = document.getElementById('schedule-results');
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">📋 강의 정보가 없습니다</div>
+                        <div class="card-content">${professorName} 교수님의 강의 정보를 찾을 수 없습니다.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 온라인/오프라인 분리
+            const isOnline = (it) => it.day === 'ONLINE' || (String(it.type||'').toLowerCase() === 'online') || (!it.day && !it.time);
+            const offlineClasses = professorClasses.filter(it => !isOnline(it) && ['MON','TUE','WED','THU','FRI','SAT'].includes(it.day));
+            const onlineClasses = professorClasses.filter(isOnline);
+
+            // 시간표 그리드 생성 (30분 단위 비율 기반)
+            const baseStart = '09:00';
+            const baseEnd = '18:00';
+            const slotMinutes = 30;
+            const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
+            const dayNames = { 'MON': '월', 'TUE': '화', 'WED': '수', 'THU': '목', 'FRI': '금' };
+
+            // 유틸: HH:MM -> 총 분, 분 -> HH:MM
+            const toMinutes = (hhmm) => {
+                const [h, m] = hhmm.split(':').map(Number);
+                return h * 60 + m;
+            };
+            const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+            const baseStartMin = toMinutes(baseStart);
+            const baseEndMin = toMinutes(baseEnd);
+
+            const rowIndexFor = (hhmm) => {
+                const mins = clamp(toMinutes(hhmm), baseStartMin, baseEndMin);
+                const steps = Math.floor((mins - baseStartMin) / slotMinutes);
+                return 2 + steps; // 1행은 헤더, 실제 타임라인은 2행부터 시작
+            };
+            const spanRowsFor = (start, end) => {
+                const s = clamp(toMinutes(start), baseStartMin, baseEndMin);
+                const e = clamp(toMinutes(end), baseStartMin, baseEndMin);
+                const duration = Math.max(0, e - s);
+                return Math.max(1, Math.ceil(duration / slotMinutes));
+            };
+
+            // 통계 계산
+            const totalSubjects = new Set(professorClasses.map(c => c.subject)).size;
+            const totalClasses = professorClasses.length;
+            const buildings = new Set(offlineClasses.map(c => c.building_name)).size;
+
+            let timetableHTML = `
+                <div class="timetable-container">
+                    <div class="timetable-header">
+                        <h3>👨‍🏫 ${professorName} 교수님 시간표</h3>
+                    </div>
+                    
+                    <div class="timetable-stats">
+                        <div class="timetable-stat">
+                            <div class="timetable-stat-number">${totalSubjects}</div>
+                            <div class="timetable-stat-label">담당 과목</div>
+                        </div>
+                        <div class="timetable-stat">
+                            <div class="timetable-stat-number">${totalClasses}</div>
+                            <div class="timetable-stat-label">총 강의</div>
+                        </div>
+                        <div class="timetable-stat">
+                            <div class="timetable-stat-number">${buildings}</div>
+                            <div class="timetable-stat-label">사용 건물</div>
+                        </div>
+                    </div>
+
+                    <div class="timetable-scale-wrap">
+                    <div class="timetable-grid-30">
+                        <div class="timetable-header-cell" style="grid-column: 1; grid-row: 1;">시간</div>
+                        <div class="timetable-header-cell" style="grid-column: 2; grid-row: 1;">${dayNames['MON']}</div>
+                        <div class="timetable-header-cell" style="grid-column: 3; grid-row: 1;">${dayNames['TUE']}</div>
+                        <div class="timetable-header-cell" style="grid-column: 4; grid-row: 1;">${dayNames['WED']}</div>
+                        <div class="timetable-header-cell" style="grid-column: 5; grid-row: 1;">${dayNames['THU']}</div>
+                        <div class="timetable-header-cell" style="grid-column: 6; grid-row: 1;">${dayNames['FRI']}</div>
+            `;
+
+            // 시간 라벨 (정각만 표시) - 18:00은 그리드 경계를 넘지 않도록 제외
+            for (let mins = toMinutes(baseStart); mins < toMinutes(baseEnd); mins += 60) {
+                const h = String(Math.floor(mins / 60)).padStart(2, '0');
+                const m = String(mins % 60).padStart(2, '0');
+                const time = `${h}:${m}`;
+                const row = rowIndexFor(time);
+                timetableHTML += `<div class="time-label" style="grid-column: 1; grid-row: ${row};">${time}</div>`;
+            }
+
+            // 강의 블록 배치
+            const dayToCol = { 'MON': 2, 'TUE': 3, 'WED': 4, 'THU': 5, 'FRI': 6 };
+            
+            // 모바일용: 요일별로 그룹화하고 시간순 정렬
+            const classByDay = {};
+            days.forEach(d => { classByDay[d] = []; });
+            offlineClasses.forEach(cls => {
+                if (days.includes(cls.day)) {
+                    classByDay[cls.day].push(cls);
+                }
+            });
+            Object.keys(classByDay).forEach(day => {
+                classByDay[day].sort((a, b) => a.start.localeCompare(b.start));
+            });
+
+            // 블록 렌더링 (모바일: data-day/data-time 속성 추가, 데스크톱: grid 위치)
+            days.forEach(day => {
+                classByDay[day].forEach(cls => {
+                    const col = dayToCol[cls.day];
+                    const rowStart = rowIndexFor(cls.start.substring(0,5));
+                    const rowSpan = spanRowsFor(cls.start.substring(0,5), cls.end.substring(0,5));
+                    const room = getRoomDisplay(cls);
+                    const title = `${cls.subject} - ${room}`;
+                    const dayLabel = dayNames[day];
+                    const timeRange = `${cls.start.substring(0,5)}~${cls.end.substring(0,5)}`;
+                    
+                    timetableHTML += `
+                        <div class="class-block" 
+                             title="${title}"
+                             data-day="${dayLabel}"
+                             data-time="${timeRange}"
+                             style="grid-column: ${col}; grid-row: ${rowStart} / span ${rowSpan};">
+                            <div class="class-subject">${cls.subject}</div>
+                            <div class="class-room">${room} · ${timeRange}</div>
+                        </div>
+                    `;
+                });
+            });
+
+            timetableHTML += `</div></div>`;
+
+            timetableHTML += `</div>`;
+
+            // 메인 결과 컨테이너에 시간표 렌더
+
+            const resultsContainer = document.getElementById('schedule-results');
+            resultsContainer.innerHTML = timetableHTML;
+
+            // 온라인 강의 목록 렌더링 (있을 경우 별도 영역)
+            const onlineContainer = document.getElementById('online-courses-list');
+            if (onlineContainer) {
+                if (onlineClasses.length > 0) {
+                    const onlineCards = `
+                        <div class="card">
+                            <div class="card-title">🌐 온라인 강의 (${onlineClasses.length}개)</div>
+                            <div class="card-content">
+                                <ul style="padding-left:18px;">
+                                    ${onlineClasses.map(item => `
+                                        <li><strong>${item.subject}</strong>${item.professor ? ` – ${getProfessorDisplay(item)}` : ''}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>`;
+                    onlineContainer.innerHTML = onlineCards;
+                } else {
+                    onlineContainer.innerHTML = '';
+                }
+            }
+
+            // 방금 삽입한 시간표 컨테이너를 정확히 찾아 즉시 스케일 적용
+            const newTimetableContainer = resultsContainer.querySelector('.timetable-container');
+            if (newTimetableContainer) {
+                // 즉시 1회 적용
+                applyTimetableAutoScale(newTimetableContainer);
+                // 다음 프레임에서 한 번 더 적용 (레이아웃 계산 안정화)
+                requestAnimationFrame(() => applyTimetableAutoScale(newTimetableContainer));
+                // 매우 짧은 지연 후 재적용 (일부 브라우저 안전망)
+                setTimeout(() => applyTimetableAutoScale(newTimetableContainer), 0);
+            }
+        }
+
+        function searchSchedule(searchType, query) {
+            // 데이터가 아직 로드되지 않았으면 경고
+            if (!timetableData || timetableData.length === 0) {
+                const resultsContainer = document.getElementById('schedule-results');
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">⏳ 데이터를 불러오는 중입니다</div>
+                        <div class="card-content">잠시 후 다시 시도해주세요.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 검색어가 비어있으면 경고
+            if (!query.trim()) {
+                const resultsContainer = document.getElementById('schedule-results');
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">⚠️ 검색어를 입력해주세요</div>
+                        <div class="card-content">검색어를 입력한 후 검색 버튼을 눌러주세요.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 교수 시간표가 아닌 일반 검색에서는 온라인 영역 초기화
+            const onlineContainer = document.getElementById('online-courses-list');
+            if (onlineContainer) onlineContainer.innerHTML = '';
+
+            let results = [];
+            const searchQuery = query.toLowerCase().trim();
+            const dayFilter = document.getElementById('schedule-day-filter').value;
+
+            switch(searchType) {
+                case 'department':
+                    results = timetableData.filter(item => 
+                        item.department.toLowerCase().includes(searchQuery) || 
+                        item.college.toLowerCase().includes(searchQuery)
+                    );
+                    break;
+                case 'professor':
+                    results = timetableData.filter(item => {
+                        const single = item.professor ? item.professor.toLowerCase() : '';
+                        const anyMulti = Array.isArray(item.professors) && item.professors.some(n => (n || '').toLowerCase().includes(searchQuery));
+                        return (single.includes(searchQuery)) || anyMulti;
+                    });
+                    break;
+                case 'classroom':
+                    results = timetableData.filter(item => 
+                        item.classroom.toLowerCase().includes(searchQuery) || 
+                        item.building_name.toLowerCase().includes(searchQuery)
+                    );
+                    break;
+                case 'subject':
+                    results = timetableData.filter(item => 
+                        item.subject.toLowerCase().includes(searchQuery)
+                    );
+                    break;
+                case 'missing-professor':
+                    results = timetableData.filter(item => {
+                        const hasSingle = item.professor && item.professor.trim() !== '';
+                        const hasMulti = Array.isArray(item.professors) && item.professors.length > 0;
+                        return !(hasSingle || hasMulti);
+                    });
+                    break;
+            }
+
+            // 요일 필터 적용
+            if (dayFilter) {
+                results = results.filter(item => item.day === dayFilter);
+            }
+
+            // 결과를 시간순으로 정렬 (온라인은 마지막)
+            results.sort((a, b) => {
+                const dayOrder = { 'MON': 1, 'TUE': 2, 'WED': 3, 'THU': 4, 'FRI': 5, 'SAT': 6, 'ONLINE': 99 };
+                if (dayOrder[a.day] !== dayOrder[b.day]) {
+                    return dayOrder[a.day] - dayOrder[b.day];
+                }
+                const sa = a.start || '';
+                const sb = b.start || '';
+                return sa.localeCompare(sb);
+            });
+
+            // 결과 렌더링
+            const resultsContainer = document.getElementById('schedule-results');
+            const dayNames = {
+                'MON': '월요일', 'TUE': '화요일', 'WED': '수요일',
+                'THU': '목요일', 'FRI': '금요일', 'SAT': '토요일', 'ONLINE': '온라인'
+            };
+
+            if (results.length > 0) {
+                // 결과가 너무 많으면 제한
+                const maxResults = 50;
+                const displayResults = results.slice(0, maxResults);
+                const hasMore = results.length > maxResults;
+
+                const scheduleCards = displayResults.map(item => {
+                    const isOnline = item.day === 'ONLINE' || (String(item.type||'').toLowerCase() === 'online');
+                    if (isOnline) {
+                        return `
+                        <div class="card">
+                            <div class="card-title">📚 ${item.subject} <span class="badge" style="margin-left:6px;">온라인</span></div>
+                            <div class="card-content">
+                                ${item.professor ? `👨‍🏫 ${getProfessorDisplay(item)}<br>` : ''}
+                                📋 ${item.code}
+                            </div>
+                        </div>`;
+                    }
+                    return `
+                    <div class="card">
+                        <div class="card-title">📚 ${item.subject}</div>
+                        <div class="card-content">
+                            👨‍🏫 ${getProfessorDisplay(item)}<br>
+                            🏛️ ${item.classroom} (${item.building_name})<br>
+                            📅 ${dayNames[item.day]} ${item.start}-${item.end}<br>
+                            🏫 ${item.department}<br>
+                            📋 ${item.code}
+                        </div>
+                    </div>`;
+                }).join('');
+
+                let resultHtml = `
+                    <div class="search-info">
+                        <p>🔍 검색 결과: <strong>${results.length}개</strong> 발견</p>
+                        ${hasMore ? `<p>⚠️ 처음 ${maxResults}개만 표시됩니다. 더 구체적인 검색어를 사용해보세요.</p>` : ''}
+                    </div>
+                ` + scheduleCards;
+
+                resultsContainer.innerHTML = resultHtml;
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-title">🔍 검색 결과가 없습니다</div>
+                        <div class="card-content">
+                            다른 검색어로 시도해보세요.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ===== 3.5. 기능 4: 캠퍼스 혼잡도 (Heatmap) =====
+        function renderHeatmapChart() {
+            // 데이터가 아직 로드되지 않았으면 대기
+            if (!timetableData || timetableData.length === 0) {
+                setTimeout(renderHeatmapChart, 1000); // 1초 후 다시 시도
+                return;
+            }
+
+            const ctx = document.getElementById('heatmap-chart').getContext('2d');
+
+            // 건물별 강의 수 집계
+            const buildingData = {};
+            timetableData.forEach(item => {
+                if (!buildingData[item.building_name]) {
+                    buildingData[item.building_name] = 0;
+                }
+                buildingData[item.building_name]++;
+            });
+
+            const buildings = Object.keys(buildingData);
+            const counts = Object.values(buildingData);
+
+            // 모바일 감지 (768px 미만)
+            const isMobile = window.innerWidth < 768;
+            const chartType = 'bar'; // Chart.js v3+에서는 'bar' 사용
+            const indexAxis = isMobile ? 'y' : 'x'; // 모바일: 가로, 데스크톱: 세로
+
+            new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: buildings,
+                    datasets: [{
+                        label: '강의 수',
+                        data: counts,
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)',
+                            'rgba(255, 107, 107, 0.8)',
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(241, 196, 15, 0.8)',
+                            'rgba(230, 126, 34, 0.8)',
+                            'rgba(149, 165, 166, 0.8)',
+                            'rgba(155, 89, 182, 0.8)',
+                            'rgba(26, 188, 156, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)',
+                            'rgba(255, 107, 107, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(230, 126, 34, 1)',
+                            'rgba(149, 165, 166, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(26, 188, 156, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: indexAxis, // 모바일: 'y' (가로), 데스크톱: 'x' (세로)
+                    responsive: true,
+                    maintainAspectRatio: false, // 컨테이너에 맞게 크기 조정
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '건물별 강의 개설 현황',
+                            font: {
+                                size: isMobile ? 14 : 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: isMobile ? 10 : 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== 3.6. 기능 5: 점심 룰렛 (Roulette) =====
+        function initializeRouletteSection() {
+            const rouletteButton = document.getElementById('roulette-button');
+            
+            rouletteButton.addEventListener('click', function() {
+                spinRoulette();
+            });
+        }
+
+        function spinRoulette() {
+            const button = document.getElementById('roulette-button');
+            const resultContainer = document.getElementById('roulette-result');
+
+            // 버튼 비활성화 및 로딩 표시
+            button.disabled = true;
+            button.textContent = '🎰 돌리는 중...';
+
+            // 애니메이션 효과를 위한 딜레이
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * restaurantsData.length);
+                const selectedRestaurant = restaurantsData[randomIndex];
+
+                // 결과 표시
+                resultContainer.innerHTML = `
+                    <div class="roulette-result">
+                        <h3>🎉 오늘의 추천 맛집!</h3>
+                        <h2>${selectedRestaurant.name}</h2>
+                        <p>분류: ${selectedRestaurant.category}</p>
+                        <p>추천 메뉴: ${selectedRestaurant.menu}</p>
+                    </div>
+                `;
+
+                // 버튼 복원
+                button.disabled = false;
+                button.textContent = '🎰 다시 돌리기';
+            }, 1500);
+        }
+    </script>
+    <script>
+        // 시간표 자동 스케일링: 모바일(<768px)에서 컨테이너 너비에 맞춰 그리드를 축소
+        function applyTimetableAutoScale(container) {
+            if (!container) return;
+            const wrap = container.querySelector('.timetable-scale-wrap');
+            const grid = container.querySelector('.timetable-grid-30');
+            if (!wrap || !grid) return;
+
+            // 초기화
+            grid.style.transform = 'none';
+
+            const isMobile = window.innerWidth < 768;
+            // 기본적으로 데스크톱은 스케일 1 유지
+            let scale = 1;
+            if (isMobile) {
+                const cw = container.clientWidth; // 패딩을 포함한 가용 너비
+                const gw = grid.scrollWidth;     // 그리드 원본 너비
+                if (gw > 0 && cw > 0 && gw > cw) {
+                    scale = cw / gw; // 컨테이너에 맞추도록 축소
+                }
+                // 모바일에서는 가로 스크롤 제거
+                container.style.overflowX = 'hidden';
+            } else {
+                // 데스크톱에서는 기존 동작 유지 (필요시 가로 스크롤 허용)
+                container.style.overflowX = 'auto';
+            }
+
+            grid.style.transformOrigin = 'top left';
+            grid.style.transform = `scale(${scale})`;
+
+            // 스케일된 높이를 래퍼에 반영해 레이아웃 붕괴 방지
+            const gridHeight = grid.offsetHeight; // 비스케일 높이
+            wrap.style.height = (gridHeight * scale) + 'px';
+        }
+
+        function applyAllTimetablesScale() {
+            document.querySelectorAll('.timetable-container').forEach(container => {
+                applyTimetableAutoScale(container);
+            });
+        }
+
+        // 리사이즈/방향 전환 시 재계산
+        window.addEventListener('resize', applyAllTimetablesScale);
+        window.addEventListener('orientationchange', applyAllTimetablesScale);
+    </script>
+</body>
+</html>
