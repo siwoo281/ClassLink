@@ -2,6 +2,7 @@
 // 배재대학교 2025학년도 2학기 실제 강의 시간표 데이터
 let timetableData = [];
 let professorsList = [];
+let classroomsList = [];
 
         // 건물 코드 → 표준 건물명 매핑 (개설강좌 리스트 기준)
 const BUILDING_NAME_MAP = {
@@ -108,6 +109,25 @@ async function loadTimetableData() {
                 
                 // 교수님 드롭다운 채우기
                 populateProfessorDropdown();
+
+                // 강의실 목록 생성 및 드롭다운 채우기
+                const classroomsSet = new Map();
+                timetableData.forEach(item => {
+                    const building = (item.building_name || '').trim();
+                    const room = (item.classroom || '').trim();
+                    if (building && room) {
+                        const key = `${building}-${room}`;
+                        if (!classroomsSet.has(key)) {
+                            classroomsSet.set(key, { building, room });
+                        }
+                    }
+                });
+                classroomsList = Array.from(classroomsSet.values()).sort((a, b) => {
+                    if (a.building < b.building) return -1;
+                    if (a.building > b.building) return 1;
+                    return a.room.localeCompare(b.room, undefined, { numeric: true });
+                });
+                populateClassroomDropdown();
                 
                 const onlineCount = timetableData.filter(i => i.day === 'ONLINE' || (i.type || '').toLowerCase() === 'online').length;
                 console.log(`시간표 데이터 로드 완료: ${timetableData.length}개 강의, ${professorsList.length}명 교수 (온라인 ${onlineCount}개)`);
@@ -419,7 +439,7 @@ function initializeSearchSection() {
             searchButton.addEventListener('click', function() {
                 const selectedDay = document.getElementById('day-select').value;
                 const selectedTime = document.getElementById('time-select').value;
-                const query = document.getElementById('building-room-query').value;
+                const selectedClassroom = document.getElementById('classroom-select').value;
 
                 if (!selectedDay) {
                     alert('요일을 선택해주세요.');
@@ -431,11 +451,11 @@ function initializeSearchSection() {
                     return;
                 }
 
-                searchEmptyClassrooms(selectedDay, selectedTime, query);
+                searchEmptyClassrooms(selectedDay, selectedTime, selectedClassroom);
             });
         }
 
-function searchEmptyClassrooms(selectedDay, selectedTime, query) {
+function searchEmptyClassrooms(selectedDay, selectedTime, selectedClassroomKey) {
             // 데이터가 아직 로드되지 않았으면 경고
             if (!timetableData || timetableData.length === 0) {
                 const resultsContainer = document.getElementById('search-results');
@@ -479,13 +499,11 @@ function searchEmptyClassrooms(selectedDay, selectedTime, query) {
                     return !occupiedRoomKeys.includes(key);
                 });
 
-            // 건물/강의실 검색어 필터링
-            const searchQuery = (query || '').toLowerCase().trim();
-            if (searchQuery) {
+            // 선택된 강의실 필터링
+            if (selectedClassroomKey) {
                 emptyRooms = emptyRooms.filter(room => {
-                    const building = (room.building_name || '').toLowerCase();
-                    const classroom = (room.classroom || '').toLowerCase();
-                    return building.includes(searchQuery) || classroom.includes(searchQuery);
+                    const key = `${room.building_name}-${room.classroom}`;
+                    return key === selectedClassroomKey;
                 });
             }
 
@@ -560,6 +578,21 @@ function populateProfessorDropdown() {
                 professorSelect.appendChild(option);
             });
         }
+
+function populateClassroomDropdown() {
+    const classroomSelect = document.getElementById('classroom-select');
+    if (!classroomSelect) return;
+
+    classroomSelect.innerHTML = '<option value="">전체 강의실</option>';
+
+    classroomsList.forEach(item => {
+        const option = document.createElement('option');
+        const key = `${item.building}-${item.room}`;
+        option.value = key;
+        option.textContent = `${item.building} - ${item.room}`;
+        classroomSelect.appendChild(option);
+    });
+}
 
         // 검색 타입에 따라 UI 토글
 function toggleSearchUI() {
