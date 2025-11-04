@@ -346,22 +346,49 @@ function updateRealTimeStatus() {
                 </div>
             `;
 
-            // 현재 진행 중인 강의 카드 렌더링
+            // 현재 진행 중인 강의 카드 렌더링 (건물별 그룹화)
             const roomsContainer = document.getElementById('current-rooms');
             if (occupiedRooms.length > 0) {
-                const roomCards = occupiedRooms.map(room => `
-                    <div class="card">
-                        <div class="card-title">🏛️ ${getRoomDisplay(room)}</div>
-                        <div class="card-content">
-                            <strong>${room.subject}</strong><br>
-                            👨‍🏫 ${getProfessorDisplay(room)}<br>
-                            🏫 ${room.department}<br>
-                            ⏰ ${room.start} - ${room.end}
+                // 건물별로 그룹화
+                const groupedByBuilding = occupiedRooms.reduce((acc, room) => {
+                    const building = room.building_name || '기타';
+                    if (!acc[building]) {
+                        acc[building] = [];
+                    }
+                    acc[building].push(room);
+                    return acc;
+                }, {});
+
+                // 그룹화된 레이아웃을 위해 클래스 변경 (기존 스타일 재사용)
+                roomsContainer.className = 'search-results-grouped';
+                let html = '';
+                const sortedBuildings = Object.keys(groupedByBuilding).sort();
+
+                for (const building of sortedBuildings) {
+                    const rooms = groupedByBuilding[building];
+                    html += `
+                        <div class="building-group">
+                            <h3 class="building-title">🏛️ ${building} (${rooms.length}개 사용 중)</h3>
+                            <div class="card-grid">
+                                ${rooms.map(room => `
+                                    <div class="card">
+                                        <div class="card-title">${getRoomDisplay(room)}</div>
+                                        <div class="card-content">
+                                            <strong>${room.subject}</strong><br>
+                                            👨‍🏫 ${getProfessorDisplay(room)}<br>
+                                            🏫 ${room.department}<br>
+                                            ⏰ ${room.start} - ${room.end}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
-                roomsContainer.innerHTML = roomCards;
+                    `;
+                }
+                roomsContainer.innerHTML = html;
             } else {
+                // 결과 없을 시 클래스 원복
+                roomsContainer.className = 'card-grid';
                 roomsContainer.innerHTML = `
                     <div class="card">
                         <div class="card-title">😴 현재 진행 중인 강의가 없습니다</div>
