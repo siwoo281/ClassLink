@@ -128,6 +128,7 @@ async function loadTimetableData() {
                     return a.room.localeCompare(b.room, undefined, { numeric: true });
                 });
                 populateClassroomDropdown();
+                populateScheduleClassroomDropdown();
                 
                 const onlineCount = timetableData.filter(i => i.day === 'ONLINE' || (i.type || '').toLowerCase() === 'online').length;
                 console.log(`시간표 데이터 로드 완료: ${timetableData.length}개 강의, ${professorsList.length}명 교수 (온라인 ${onlineCount}개)`);
@@ -594,22 +595,42 @@ function populateClassroomDropdown() {
     });
 }
 
+function populateScheduleClassroomDropdown() {
+    const classroomSelect = document.getElementById('schedule-classroom-select');
+    if (!classroomSelect) return;
+
+    classroomSelect.innerHTML = '<option value="">강의실을 선택하세요</option>';
+
+    classroomsList.forEach(item => {
+        const option = document.createElement('option');
+        const key = `${item.building}-${item.room}`;
+        option.value = key;
+        option.textContent = `${item.building} - ${item.room}`;
+        classroomSelect.appendChild(option);
+    });
+}
+
         // 검색 타입에 따라 UI 토글
 function toggleSearchUI() {
             const searchType = document.getElementById('schedule-type').value;
             const searchInputGroup = document.getElementById('search-input-group');
             const professorSelectGroup = document.getElementById('professor-select-group');
-            
+            const scheduleClassroomSelectGroup = document.getElementById('schedule-classroom-select-group');
+
+            // Hide all special inputs first
+            searchInputGroup.style.display = 'none';
+            professorSelectGroup.style.display = 'none';
+            scheduleClassroomSelectGroup.style.display = 'none';
+
             if (searchType === 'professor-timetable') {
-                searchInputGroup.style.display = 'none';
                 professorSelectGroup.style.display = 'block';
             } else if (searchType === 'missing-professor') {
-                // 교수명 누락 강의는 검색어 입력 불필요
-                searchInputGroup.style.display = 'none';
-                professorSelectGroup.style.display = 'none';
+                // No input needed
+            } else if (searchType === 'classroom') {
+                scheduleClassroomSelectGroup.style.display = 'block';
             } else {
+                // Default text input
                 searchInputGroup.style.display = 'block';
-                professorSelectGroup.style.display = 'none';
             }
         }
 
@@ -627,8 +648,10 @@ function initializeScheduleSection() {
                         showProfessorTimetable(selectedProfessor);
                     }
                 } else if (type === 'missing-professor') {
-                    // 교수명 누락 강의는 검색어 없이 바로 검색
                     searchSchedule(type, '');
+                } else if (type === 'classroom') {
+                    const selectedClassroom = document.getElementById('schedule-classroom-select').value;
+                    searchSchedule(type, selectedClassroom);
                 } else {
                     const query = searchQuery.value.trim();
                     searchSchedule(type, query);
@@ -889,10 +912,10 @@ function searchSchedule(searchType, query) {
                     });
                     break;
                 case 'classroom':
-                    results = timetableData.filter(item => 
-                        item.classroom.toLowerCase().includes(searchQuery) || 
-                        item.building_name.toLowerCase().includes(searchQuery)
-                    );
+                    results = timetableData.filter(item => {
+                        const key = `${(item.building_name || '').trim()}-${(item.classroom || '').trim()}`;
+                        return key === searchQuery; // searchQuery is the selected classroom key
+                    });
                     break;
                 case 'subject':
                     results = timetableData.filter(item => 
