@@ -338,18 +338,30 @@
         }
 
         /* Search Container */
-        .search-container {
-            background: #f8f9fa;
-            padding: 30px;
+        .search-form-container {
+            background: #f8f9ff;
+            padding: 25px;
             border-radius: 15px;
             margin-bottom: 30px;
+            border: 1px solid #e1e8ed;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        .search-form {
+        .search-form, .schedule-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             align-items: end;
+        }
+        
+        .search-form .btn, .schedule-form .btn {
+            grid-column: 1 / -1; /* 버튼을 항상 맨 아래 전체 너비로 */
+        }
+
+        @media (min-width: 768px) {
+            .search-form .btn, .schedule-form .btn {
+                grid-column: auto; /* 데스크톱에서는 원래대로 */
+            }
         }
 
         .search-info {
@@ -383,6 +395,7 @@
             position: relative;
             width: 100%;
             overflow: hidden; /* 스케일 후 넘침 제거 */
+            min-height: 500px; /* 최소 높이를 지정하여 밀림 현상 방지 */
         }
 
         .timetable-scale-wrap > .timetable-grid-30 {
@@ -480,6 +493,46 @@
         .class-room::before {
             content: "📍";
             font-size: 0.9rem;
+        }
+
+        .free-slot-block {
+            background-color: #f0fdf4; /* Light green */
+            border: 2px dashed #86efac; /* Dashed green border */
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 10px rgba(134, 239, 172, 0.1);
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .free-slot-block:hover {
+            opacity: 1;
+            background-color: #dcfce7;
+            border-style: solid;
+        }
+
+        .free-slot-text {
+            font-weight: 600;
+            color: #166534; /* Dark green */
+        }
+
+        .empty-slot-block {
+            background-color: #f8f9fa;
+            border: 1px dashed #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        .empty-slot-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #9ca3af;
         }
 
         /* MOBILE-FIRST: 기존 고정 그리드 시간표 - 세로 리스트 */
@@ -771,34 +824,53 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .nav-container {
-                flex-direction: column;
-                gap: 20px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
             }
 
             .nav-links {
+                order: 3;
+                width: 100%;
                 flex-wrap: wrap;
                 justify-content: center;
             }
 
             main {
-                padding: 30px 20px;
+                padding: 30px 15px;
             }
 
             .section-title {
                 font-size: 1.5rem;
             }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
 
             .time-buttons {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
 
             .search-form {
                 grid-template-columns: 1fr;
             }
 
+            /* 터치 영역 확보 및 하이라이트 제거 */
+            .btn, .time-btn, .nav-link, .dashboard-card {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
+            }
+
             /* 모바일에서는 가로 스크롤을 없애고(기본은 숨김), 자동 축소로 한 화면에 맞춤 */
             .timetable-container {
                 overflow-x: hidden;
+                padding: 15px;
             }
 
             /* 모바일에서 그리드 기본 글자 크기 약간 축소 (스케일 전 가독성 보정) */
@@ -858,27 +930,152 @@
     color: #6c757d;
 }
 
+/* --- 건물별 시간표 --- */
+.building-timetable .timetable-grid {
+    grid-template-columns: 80px repeat(5, 1fr);
+}
+.class-list-in-cell {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8rem;
+    text-align: left;
+}
+.class-list-in-cell li {
+    margin-bottom: 4px;
+    padding: 3px 5px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* --- 빈 강의실 검색 결과 그룹화 --- */
 .search-results-grouped {
     margin-top: 30px;
 }
 
 .building-group {
-    margin-bottom: 40px;
+    margin-bottom: 15px;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.building-group:has(.building-card.open) {
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
 }
 
 .building-title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #333;
-    padding-bottom: 12px;
-    margin-bottom: 20px;
-    border-bottom: 3px solid #667eea;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    transition: background-color 0.2s ease;
+}
+
+.building-title.open, .building-title:hover {
+    background-color: #f8f9ff;
+}
+
+.building-summary {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.summary-occupied { color: #e53e3e; }
+.summary-empty { color: #38a169; }
+
+.arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.building-card.open .arrow {
+    transform: rotate(180deg);
+}
+
+.building-details {
+    padding: 0 20px 20px 20px;
+    background-color: #f8f9ff;
+    border-top: 1px solid #e1e8ed;
+}
+
+#consultation-section .schedule-form {
+    grid-template-columns: 1fr auto;
+}
+
+#consultation-section .btn {
+    align-self: end;
+    padding: 12px 20px;
+}
+
+.details-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 20px 0 15px;
+    color: #555;
+}
+
+.empty-room-card {
+    cursor: pointer;
+}
+
+/* 로딩 인디케이터 스타일 */
+#loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+#loading-indicator.loading-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 모달이 열렸을 때 배경 스크롤 방지 */
+body.modal-open {
+    overflow: hidden;
 }
 
 /* 데스크톱에서 그룹 타이틀 크기 조정 */
 @media (min-width: 768px) {
     .building-title {
-        font-size: 1.75rem;
+        font-size: 1.4rem;
+        padding: 20px 25px;
     }
 }

@@ -10,6 +10,4 @@ self.addEventListener('activate', (event) => {
 });
 
 // No caching or special handling; just a pass-through
-self.addEventListener('fetch', (event) => {
-  // Intentionally empty: default network behavior
-});
+

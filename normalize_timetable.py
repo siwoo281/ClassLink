@@ -2,7 +2,7 @@ import json
 import re
 from collections import Counter
 
-INPUT = "timetable_final.json"
+INPUT = "timetable.json"
 OUTPUT = "timetable_flat.json"
 
 code_title_pattern = re.compile(r"^(?P<code>[A-Z]{3}\d{5})\s+(?P<title>.+)$")

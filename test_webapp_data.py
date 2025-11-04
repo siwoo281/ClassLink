@@ -11,7 +11,7 @@ def main():
     print("=" * 80)
     
     # 데이터 로드
-    with open('timetable_final.json', 'r', encoding='utf-8') as f:
+    with open('timetable.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     print(f"\n✅ 데이터 로드 성공: {len(data)}개 레코드\n")
