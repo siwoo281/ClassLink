@@ -391,7 +391,8 @@ function initializeSearchSection() {
             // 검색 버튼 이벤트
             searchButton.addEventListener('click', function() {
                 const selectedDay = document.getElementById('day-select').value;
-                const selectedTime = timeSelect.value;
+                const selectedTime = document.getElementById('time-select').value;
+                const query = document.getElementById('building-room-query').value;
 
                 if (!selectedDay) {
                     alert('요일을 선택해주세요.');
@@ -403,11 +404,11 @@ function initializeSearchSection() {
                     return;
                 }
 
-                searchEmptyClassrooms(selectedDay, selectedTime);
+                searchEmptyClassrooms(selectedDay, selectedTime, query);
             });
         }
 
-function searchEmptyClassrooms(selectedDay, selectedTime) {
+function searchEmptyClassrooms(selectedDay, selectedTime, query) {
             // 데이터가 아직 로드되지 않았으면 경고
             if (!timetableData || timetableData.length === 0) {
                 const resultsContainer = document.getElementById('search-results');
@@ -422,19 +423,20 @@ function searchEmptyClassrooms(selectedDay, selectedTime) {
 
             // 선택된 시간에 사용 중인 강의실
             const occupiedRooms = timetableData.filter(item => {
-                return item.day === selectedDay && 
-                       selectedTime >= item.start && 
+                return item.day === selectedDay &&
+                       selectedTime >= item.start &&
                        selectedTime < item.end;
             });
 
-            const occupiedRoomKeys = occupiedRooms.map(item => 
+            const occupiedRoomKeys = occupiedRooms.map(item =>
                 `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`
             );
 
-            // 전체 강의실에서 사용 중인 강의실 제외
+            // 전체 강의실 데이터 생성 (중복 제거)
             const allRoomsData = timetableData.reduce((acc, item) => {
                 const key = `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`;
-                if (!acc[key]) {
+                // 온라인 강의나, 건물/강의실 정보가 없는 경우는 제외
+                if (key !== '-' && !acc[key]) {
                     acc[key] = {
                         classroom: item.classroom,
                         building_name: item.building_name
@@ -443,9 +445,22 @@ function searchEmptyClassrooms(selectedDay, selectedTime) {
                 return acc;
             }, {});
 
-            const emptyRooms = Object.entries(allRoomsData)
-                .filter(([key]) => !occupiedRoomKeys.includes(key))
-                .map(([key, data]) => data);
+            // 빈 강의실 필터링
+            let emptyRooms = Object.values(allRoomsData)
+                .filter(room => {
+                    const key = `${(room.building_name||'').trim()}-${(room.classroom||'').trim()}`;
+                    return !occupiedRoomKeys.includes(key);
+                });
+
+            // 건물/강의실 검색어 필터링
+            const searchQuery = (query || '').toLowerCase().trim();
+            if (searchQuery) {
+                emptyRooms = emptyRooms.filter(room => {
+                    const building = (room.building_name || '').toLowerCase();
+                    const classroom = (room.classroom || '').toLowerCase();
+                    return building.includes(searchQuery) || classroom.includes(searchQuery);
+                });
+            }
 
             // 결과 렌더링
             const resultsContainer = document.getElementById('search-results');
@@ -455,21 +470,47 @@ function searchEmptyClassrooms(selectedDay, selectedTime) {
             };
 
             if (emptyRooms.length > 0) {
-                const roomCards = emptyRooms.map(room => `
-                    <div class="card">
-                        <div class="card-title">🏛️ ${getRoomDisplay(room)}</div>
-                        <div class="card-content">
-                            ⏰ ${dayNames[selectedDay]} ${selectedTime}
+                // 건물별로 그룹화
+                const groupedByBuilding = emptyRooms.reduce((acc, room) => {
+                    const building = room.building_name || '기타';
+                    if (!acc[building]) {
+                        acc[building] = [];
+                    }
+                    acc[building].push(room);
+                    return acc;
+                }, {});
+
+                // 결과 컨테이너 클래스 변경 및 HTML 생성
+                resultsContainer.className = 'search-results-grouped';
+                let html = '';
+                const sortedBuildings = Object.keys(groupedByBuilding).sort();
+
+                for (const building of sortedBuildings) {
+                    const rooms = groupedByBuilding[building];
+                    html += `
+                        <div class="building-group">
+                            <h3 class="building-title">🏛️ ${building} (${rooms.length}개)</h3>
+                            <div class="card-grid">
+                                ${rooms.map(room => `
+                                    <div class="card">
+                                        <div class="card-title">${getRoomDisplay(room)}</div>
+                                        <div class="card-content">
+                                            ⏰ ${dayNames[selectedDay]} ${selectedTime}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
-                resultsContainer.innerHTML = roomCards;
+                    `;
+                }
+                resultsContainer.innerHTML = html;
             } else {
+                resultsContainer.className = 'card-grid'; // 결과 없을 시 클래스 원복
                 resultsContainer.innerHTML = `
                     <div class="card">
                         <div class="card-title">😔 빈 강의실이 없습니다</div>
                         <div class="card-content">
-                            해당 시간에는 모든 강의실이 사용 중입니다.
+                            해당 조건에 맞는 빈 강의실을 찾을 수 없습니다.
                         </div>
                     </div>
                 `;

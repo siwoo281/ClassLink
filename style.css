@@ -857,3 +857,28 @@
     font-size: 0.9rem;
     color: #6c757d;
 }
+
+/* --- 빈 강의실 검색 결과 그룹화 --- */
+.search-results-grouped {
+    margin-top: 30px;
+}
+
+.building-group {
+    margin-bottom: 40px;
+}
+
+.building-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #667eea;
+}
+
+/* 데스크톱에서 그룹 타이틀 크기 조정 */
+@media (min-width: 768px) {
+    .building-title {
+        font-size: 1.75rem;
+    }
+}
