@@ -914,7 +914,7 @@ function searchSchedule(searchType, query) {
                 case 'classroom':
                     results = timetableData.filter(item => {
                         const key = `${(item.building_name || '').trim()}-${(item.classroom || '').trim()}`;
-                        return key === searchQuery; // searchQuery is the selected classroom key
+                        return key.toLowerCase() === searchQuery.toLowerCase(); // Ensure both sides are same case
                     });
                     break;
                 case 'subject':
