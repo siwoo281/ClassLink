@@ -2,6 +2,7 @@
 let timetableData = [];
 let professorsList = [];
 let classroomsList = [];
+const dayNameMap = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토' };
 
 // ===== 데이터 로드 =====
 async function loadTimetableData() {
@@ -96,17 +97,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     const sections = document.querySelectorAll('section');
     const nav = document.querySelector('nav');
 
+    function setActiveSection(targetId) {
+        if (!targetId) targetId = 'home';
+        
+        sections.forEach(section => section.classList.add('section-hidden'));
+        navLinks.forEach(navLink => navLink.classList.remove('active'));
+
+        const targetSection = document.getElementById(targetId);
+        const targetLink = document.querySelector(`[data-target="${targetId}"]`);
+
+        if (targetSection) targetSection.classList.remove('section-hidden');
+        if (targetLink) targetLink.classList.add('active');
+        
+        window.location.hash = targetId;
+        initializeSection(targetId);
+    }
+
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const targetId = this.getAttribute('data-target');
             if (nav) nav.classList.remove('nav-open');
-            sections.forEach(section => section.classList.add('section-hidden'));
-            navLinks.forEach(navLink => navLink.classList.remove('active'));
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) targetSection.classList.remove('section-hidden');
-            this.classList.add('active');
-            initializeSection(targetId);
+            setActiveSection(targetId);
         });
     });
 
@@ -116,6 +128,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             nav.classList.toggle('nav-open');
         });
     }
+
+    // URL 해시에 따라 초기 섹션 설정
+    const initialSection = window.location.hash.substring(1) || 'home';
+    setActiveSection(initialSection);
 
     initializeSearchSection();
     initializeScheduleSection();
@@ -177,14 +193,17 @@ function updateRealTimeStatus() {
     statsContainer.innerHTML = `
         <div class="stats-container">
             <div class="stat-card">
+                <div class="stat-icon">🔴</div>
                 <div class="stat-number">${occupiedRoomKeys.size}</div>
                 <div class="stat-label">사용 중</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">🟢</div>
                 <div class="stat-number">${emptyRoomsCount}</div>
                 <div class="stat-label">빈 강의실</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">🏢</div>
                 <div class="stat-number">${allRoomKeys.length}</div>
                 <div class="stat-label">전체</div>
             </div>
@@ -257,18 +276,19 @@ function updateRealTimeStatus() {
         `;
     }).join('');
 
-    // 6. 생성된 건물 카드에 클릭 이벤트 리스너 추가
-    document.querySelectorAll('.building-card').forEach(card => {
-        card.onclick = function() {
-            const building = card.dataset.building;
-            const detailsDiv = document.getElementById(`details-${building}`);
-            const arrow = card.querySelector('.arrow');
-            const isHidden = detailsDiv.style.display === 'none';
-            
-            detailsDiv.style.display = isHidden ? 'block' : 'none';
-            arrow.textContent = isHidden ? '▲' : '▼';
-            card.classList.toggle('open', isHidden);
-        };
+    // 6. 생성된 건물 카드에 클릭 이벤트 리스너 추가 (이벤트 위임)
+    roomsContainer.addEventListener('click', function(e) {
+        const card = e.target.closest('.building-card');
+        if (!card) return;
+
+        const building = card.dataset.building;
+        const detailsDiv = document.getElementById(`details-${building}`);
+        const arrow = card.querySelector('.arrow');
+        const isHidden = detailsDiv.style.display === 'none';
+        
+        detailsDiv.style.display = isHidden ? 'block' : 'none';
+        arrow.textContent = isHidden ? '▲' : '▼';
+        card.classList.toggle('open', isHidden);
     });
 }
 
@@ -336,17 +356,35 @@ function initializeSearchSection() {
         const day = document.getElementById('day-select').value;
         const time = document.getElementById('time-select').value;
         const roomKey = document.getElementById('classroom-select').value;
+        
+        // 검색 시간 (1시간 범위)
+        const searchStart = time;
+        const searchEnd = time ? `${String(parseInt(time.split(':')[0]) + 1).padStart(2, '0')}:${time.split(':')[1]}` : '';
+
         // 전체 강의실 목록 생성
         const allRoomKeys = classroomsList.map(({building, room}) => `${building}-${room}`);
-        // 해당 시간에 사용 중인 강의실 목록
-        let occupiedRoomKeys = timetableData.filter(item => {
-            if (day && item.day !== day) return false;
-            if (time && !(item.start <= time && time < item.end)) return false;
-            if (roomKey && `${item.building_name}-${item.classroom}` !== roomKey) return false;
-            return item.day !== 'ONLINE';
-        }).map(item => `${item.building_name}-${item.classroom}`);
+        
+        // 해당 시간에 사용 중인 (겹치는) 강의실 목록
+        let occupiedRoomKeys = new Set();
+        timetableData.forEach(item => {
+            if (day && item.day !== day) return;
+            if (roomKey && `${item.building_name}-${item.classroom}` !== roomKey) return;
+            if (item.day === 'ONLINE') return;
+
+            // 시간 조건이 있을 때만 겹치는지 확인
+            if (time) {
+                const classStart = item.start;
+                const classEnd = item.end;
+                // 겹치는 조건: (내 시작 < 수업 끝) AND (내 끝 > 수업 시작)
+                if (searchStart < classEnd && searchEnd > classStart) {
+                    occupiedRoomKeys.add(`${item.building_name}-${item.classroom}`);
+                }
+            }
+        });
+
         // 빈 강의실 목록
-        let emptyRooms = allRoomKeys.filter(key => !occupiedRoomKeys.includes(key));
+        let emptyRooms = allRoomKeys.filter(key => !occupiedRoomKeys.has(key));
+        
         // 건물별 그룹화
         const grouped = {};
         emptyRooms.forEach(key => {
@@ -357,11 +395,11 @@ function initializeSearchSection() {
         const container = document.getElementById('search-results');
         if (emptyRooms.length) {
             container.innerHTML = `<h3>빈 강의실 (${emptyRooms.length}개)</h3>` +
-                Object.keys(grouped).map(building =>
+                Object.keys(grouped).sort().map(building =>
                     `<div class="building-group">
                         <div class="building-title">${building}</div>
                         <div class="card-grid">
-                            ${grouped[building].map(room =>
+                            ${grouped[building].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(room =>
                                 `<div class="card empty-room-card" data-building="${building}" data-room="${room}">
                                     <div class="card-title">${building} ${room}</div>
                                 </div>`
@@ -370,23 +408,25 @@ function initializeSearchSection() {
                     </div>`
                 ).join('');
         } else {
-            container.innerHTML = '<div class="card">검색 결과 없음</div>';
+            container.innerHTML = getNoResultsMessage('텅 비었어요! 현재 조건에 맞는 빈 강의실이 없습니다.');
         }
-        // 빈 강의실 카드 클릭 시 상세 팝업
-        document.querySelectorAll('.empty-room-card').forEach(card => {
-            card.onclick = function() {
-                const building = card.dataset.building;
-                const room = card.dataset.room;
-                const timeVal = time;
-                const dayVal = day;
-                // 해당 강의실의 해당 시간대 사용 내역
-                const used = timetableData.filter(item =>
-                    item.building_name === building && item.classroom === room &&
-                    (!dayVal || item.day === dayVal) && (!timeVal || (item.start <= timeVal && timeVal < item.end))
-                );
-                showRoomDetailModal(building, room, used, dayVal, timeVal);
-            };
-        });
+
+        // 빈 강의실 카드 클릭 시 상세 팝업 (이벤트 위임)
+        container.onclick = function(e) {
+            const card = e.target.closest('.empty-room-card');
+            if (!card) return;
+
+            const building = card.dataset.building;
+            const room = card.dataset.room;
+            const timeVal = time;
+            const dayVal = day;
+            
+            const used = timetableData.filter(item =>
+                item.building_name === building && item.classroom === room &&
+                (!dayVal || item.day === dayVal) && (!timeVal || (searchStart < item.end && searchEnd > item.start))
+            );
+            showRoomDetailModal(building, room, used, dayVal, timeVal);
+        };
     };
 
     // 모달 생성 함수
@@ -476,11 +516,31 @@ function initializeScheduleSection() {
         const prof = profSelect.value;
         const roomKey = roomSelect.value;
         const day = daySelect.value;
+
+        // "강의실별 시간표" 기능 특별 처리
+        if (type === 'classroom' && roomKey) {
+            const [building, room] = roomKey.split('-');
+            const title = `${building} ${room} 강의실 주간 시간표`;
+            const classesForRoom = timetableData.filter(item => 
+                item.building_name === building && item.classroom === room
+            );
+
+            if (classesForRoom.length > 0) {
+                const visualTimetableHTML = generateVisualTimetable(classesForRoom, title);
+                resultsContainer.innerHTML = visualTimetableHTML;
+                applyAllTimetablesScale(); // 생성된 시간표에 자동 스케일링 적용
+            } else {
+                resultsContainer.innerHTML = getNoResultsMessage('해당 강의실에는 배정된 강의가 없습니다.');
+            }
+            onlineContainer.innerHTML = ''; // 온라인 강의 목록은 비움
+            return; // 여기서 함수 실행 종료
+        }
+
         let results = timetableData.filter(item => {
             if (type === 'subject' && query && !item.subject.includes(query)) return false;
             if (type === 'professor' && query && !item.professor.includes(query)) return false;
             if (type === 'department' && query && !item.department.includes(query)) return false;
-            if (type === 'classroom' && roomKey && `${item.building_name}-${item.classroom}` !== roomKey) return false;
+            // 'classroom' 타입은 위에서 특별 처리했으므로 여기서는 무시됨
             if (type === 'professor-timetable' && prof && item.professor !== prof) return false;
             if (type === 'missing-professor' && item.professor) return false;
             if (day && item.day !== day) return false;
@@ -523,7 +583,7 @@ function initializeScheduleSection() {
                         <b>학과:</b> ${item.department || '-'}
                     </div>
                 </div>`
-            ).join('') : '<div class="card">검색 결과 없음</div>';
+            ).join('') : getNoResultsMessage('조건에 맞는 강의를 찾을 수 없습니다.');
         }
 
         // 온라인 강의 별도 표시
@@ -595,27 +655,79 @@ function initializeProfessorSection() {
 
         // 교수님 통계 계산
         const totalCredits = classes.reduce((sum, c) => sum + (c.credit || 0), 0);
-        const teachingDays = [...new Set(classes.map(c => c.day))].filter(d => d !== 'ONLINE').join(', ');
+        const teachingDays = [...new Set(classes.map(c => c.day))].filter(d => d !== 'ONLINE');
         const mainBuilding = [...new Set(classes.map(c => c.building_name))].filter(b => b).join(', ');
+
+        // --- 추가 통계 계산 ---
+        // 오전/오후 강의 비율
+        const amClasses = classes.filter(c => c.start < '12:00' && c.day !== 'ONLINE').length;
+        const pmClasses = classes.filter(c => c.start >= '12:00' && c.day !== 'ONLINE').length;
+
+        // 가장 바쁜 요일
+        const dayCounts = classes.reduce((acc, c) => {
+            if (c.day !== 'ONLINE') {
+                acc[c.day] = (acc[c.day] || 0) + 1;
+            }
+            return acc;
+        }, {});
+        let busiestDay = '없음';
+        let maxCount = 0;
+        Object.entries(dayCounts).forEach(([day, count]) => {
+            if (count > maxCount) {
+                maxCount = count;
+                busiestDay = `${dayNameMap[day]}요일 (${count}개)`;
+            }
+        });
+
+        // 주요 강의실
+        const classroomCounts = classes.reduce((acc, c) => {
+            const room = getRoomDisplay(c);
+            if (room !== '온라인' && room !== '-') {
+                acc[room] = (acc[room] || 0) + 1;
+            }
+            return acc;
+        }, {});
+        let topClassroom = '없음';
+        let maxRoomCount = 0;
+        for (const room in classroomCounts) {
+            if (classroomCounts[room] > maxRoomCount) {
+                maxRoomCount = classroomCounts[room];
+                topClassroom = room;
+            }
+        }
 
         // 통계 및 시간표 템플릿
         resultsDiv.innerHTML = `
-            <div class="timetable-stats">
+            <div class="timetable-stats" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
                 <div class="timetable-stat">
+                    <div class="stat-icon">📚</div>
                     <div class="timetable-stat-number">${classes.length}</div>
                     <div class="timetable-stat-label">총 강의 수</div>
                 </div>
                 <div class="timetable-stat">
-                    <div class="timetable-stat-number">${totalCredits}</div>
-                    <div class="timetable-stat-label">총 학점</div>
+                    <div class="stat-icon">⏳</div>
+                    <div class="timetable-stat-number">${amClasses} / ${pmClasses}</div>
+                    <div class="timetable-stat-label">오전 / 오후</div>
                 </div>
                 <div class="timetable-stat">
-                    <div class="timetable-stat-number">${teachingDays || '온라인'}</div>
-                    <div class="timetable-stat-label">강의 요일</div>
+                    <div class="stat-icon">🔥</div>
+                    <div class="timetable-stat-number">${busiestDay}</div>
+                    <div class="timetable-stat-label">가장 바쁜 요일</div>
                 </div>
                 <div class="timetable-stat">
+                    <div class="stat-icon">📍</div>
+                    <div class="timetable-stat-number">${topClassroom}</div>
+                    <div class="timetable-stat-label">주요 강의실</div>
+                </div>
+                <div class="timetable-stat">
+                    <div class="stat-icon">🗓️</div>
+                    <div class="timetable-stat-number">${teachingDays.length}일</div>
+                    <div class="timetable-stat-label">강의하는 날</div>
+                </div>
+                <div class="timetable-stat">
+                    <div class="stat-icon">🏢</div>
                     <div class="timetable-stat-number">${mainBuilding || '없음'}</div>
-                    <div class="timetable-stat-label">주 강의 건물</div>
+                    <div class="timetable-stat-label">활동 건물</div>
                 </div>
             </div>
             <div id="professor-visual-timetable"></div>
@@ -745,7 +857,7 @@ function renderHeatmapChart() {
 
 function generateVisualTimetable(classes, titleName) {
     const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
-    const timeSlots = 18; // 9:00 ~ 17:30 (30분 단위)
+    const timeSlots = 26; // 9:00 ~ 21:30 (30분 단위)
 
     let tableHtml = `
         <div class="timetable-container">
@@ -772,11 +884,7 @@ function generateVisualTimetable(classes, titleName) {
     // 3. 배경 '공강' 블록 - 위치 명시
     for (let d = 0; d < days.length; d++) {
         for (let t = 0; t < timeSlots; t++) {
-            tableHtml += `
-                <div class="empty-slot-block" style="grid-column: ${d + 2}; grid-row: ${t + 2};">
-                    <span class="empty-slot-text">공강</span>
-                </div>
-            `;
+            tableHtml += `<div class="empty-slot-block" style="grid-column: ${d + 2}; grid-row: ${t + 2};"><span class="empty-slot-text">공강</span></div>`;
         }
     }
 
@@ -819,24 +927,43 @@ function applyAllTimetablesScale() {
             timetable.style.transform = 'none';
             container.style.height = 'auto';
 
-            // 잠시 후 계산하여 렌더링 시간을 확보
-            setTimeout(() => {
-                const containerWidth = container.offsetWidth;
-                const timetableWidth = timetable.offsetWidth;
-                
-                if (timetableWidth > containerWidth) {
-                    const scale = containerWidth / timetableWidth;
-                    timetable.style.transform = `scale(${scale})`;
-                    container.style.height = `${timetable.offsetHeight * scale}px`;
-                } else {
-                    // 컨테이너보다 작거나 같으면 원래 크기대로
-                    timetable.style.transform = 'none';
-                    container.style.height = `${timetable.offsetHeight}px`;
-                }
-            }, 50); // 50ms 딜레이로 안정성 확보
+            const containerWidth = container.offsetWidth;
+            const timetableWidth = timetable.offsetWidth;
+            
+            if (timetableWidth > containerWidth) {
+                const scale = containerWidth / timetableWidth;
+                timetable.style.transform = `scale(${scale})`;
+                container.style.height = `${timetable.offsetHeight * scale}px`;
+            } else {
+                // 컨테이너보다 작거나 같으면 원래 크기대로
+                timetable.style.transform = 'none';
+                container.style.height = `${timetable.offsetHeight}px`;
+            }
         }
     });
 }
 
-// 창 크기 변경 시 시간표 스케일 재조정
-window.addEventListener('resize', applyAllTimetablesScale);
+// Debounce 함수: 이벤트가 멈춘 후 일정 시간이 지나면 함수를 실행
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// 창 크기 변경 시 시간표 스케일 재조정 (Debounce 적용으로 성능 최적화)
+window.addEventListener('resize', debounce(applyAllTimetablesScale, 150));
+
+function getNoResultsMessage(message) {
+    return `
+        <div class="no-results">
+            <div class="no-results-icon">🤷</div>
+            <p>${message}</p>
+        </div>
+    `;
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캠퍼스 헬퍼 - 배재대학교</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1"></script>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div id="loading-indicator" class="loading-visible">
+        <div class="spinner"></div>
+    </div>
+    <div class="container">
+        <nav>
+            <div class="nav-container">
+                <div class="nav-brand" data-target="home" style="cursor: pointer;">🏫 캠퍼스 헬퍼</div>
+                <button id="menu-toggle" aria-label="메뉴 열기">☰</button>
+                <ul class="nav-links">
+                    <li><a class="nav-link active" data-target="home">🏠 실시간 현황</a></li>
+                    <li><a class="nav-link" data-target="search">🔍 빈 강의실 검색</a></li>
+                    <li><a class="nav-link" data-target="schedule">🗓️ 스케줄 조회</a></li>
+                        <li><a class="nav-link" data-target="professor-timetable">👨‍🏫 교수님 관련</a></li>
+                    <li><a class="nav-link" data-target="heatmap">📊 캠퍼스 혼잡도</a></li>
+                    <li><a class="nav-link" data-target="roulette">🍔 점심 룰렛</a></li>
+                    <!-- 건물별 시간표 탭 삭제 -->
+                </ul>
+            </div>
+        </nav>
+
+        <main>
+            <!-- 교수별 시간표 조회 섹션 -->
+                            <section id="professor-timetable" class="section-hidden">
+                                <h1 class="section-title">👨‍🏫 교수님별 시간표 조회</h1>
+                                <div class="professor-section-wrap">
+                                    <div class="professor-main-content">
+                                        <div class="form-group">
+                                            <label for="professor-main-select">교수님을 선택하여 시간표와 통계를 확인하세요</label>
+                                            <select id="professor-main-select">
+                                                <option value="">교수님을 선택하세요</option>
+                                            </select>
+                                        </div>
+                                        <div id="professor-main-results">
+                                            <!-- Professor details will be rendered here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+            <!-- 캠퍼스 혼잡도 섹션 -->
+            <section id="heatmap" class="section-hidden">
+                <h1 class="section-title">📊 캠퍼스 혼잡도</h1>
+                <div style="width:100%;max-width:700px;margin:0 auto;">
+                    <canvas id="heatmap-chart" style="width:100%;height:400px;"></canvas>
+                </div>
+            </section>
+            <!-- 스케줄 조회 섹션 -->
+            <section id="schedule" class="section-hidden">
+                <h1 class="section-title">🗓️ 스케줄 조회</h1>
+                <div class="search-form-container">
+                    <div class="schedule-form">
+                        <div class="form-group">
+                            <label for="schedule-type">검색 유형</label>
+                            <select id="schedule-type">
+                                <option value="subject">과목명</option>
+                                <option value="professor">교수명</option>
+                                <option value="department">학과/단과대</option>
+                                <option value="classroom">강의실</option>
+                                <option value="missing-professor">교수명 누락 강의</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="search-input-group">
+                            <label for="schedule-query">검색어</label>
+                            <input type="text" id="schedule-query" placeholder="검색어 입력">
+                        </div>
+                        <div class="form-group" id="professor-select-group" style="display:none;">
+                            <label for="professor-select">교수명</label>
+                            <select id="professor-select">
+                                <option value="">교수님을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="schedule-classroom-select-group" style="display:none;">
+                            <label for="schedule-classroom-select">강의실</label>
+                            <select id="schedule-classroom-select">
+                                <option value="">강의실을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="schedule-day-filter">요일</label>
+                            <select id="schedule-day-filter">
+                                <option value="">전체</option>
+                                <option value="MON">월요일</option>
+                                <option value="TUE">화요일</option>
+                                <option value="WED">수요일</option>
+                                <option value="THU">목요일</option>
+                                <option value="FRI">금요일</option>
+                                <option value="SAT">토요일</option>
+                            </select>
+                        </div>
+                        <button class="btn" id="schedule-search-button">검색</button>
+                    </div>
+                </div>
+                <div id="schedule-results"></div>
+                <div id="online-courses-list"></div>
+            </section>
+            <!-- 빈 강의실 검색 섹션 -->
+            <section id="search" class="section-hidden">
+                <h1 class="section-title">🔍 빈 강의실 검색</h1>
+                <div class="search-form-container">
+                    <div class="search-form">
+                        <div class="form-group">
+                            <label for="day-select">요일</label>
+                            <select id="day-select">
+                                <option value="">요일 선택</option>
+                                <option value="MON">월요일</option>
+                                <option value="TUE">화요일</option>
+                                <option value="WED">수요일</option>
+                                <option value="THU">목요일</option>
+                                <option value="FRI">금요일</option>
+                                <option value="SAT">토요일</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="time-select">시간</label>
+                            <select id="time-select">
+                                <option value="">시간 선택</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                            </select>
+                            <div class="time-buttons" style="margin-top:8px;">
+                                <button class="time-btn" data-time="09:00">09:00</button>
+                                <button class="time-btn" data-time="10:00">10:00</button>
+                                <button class="time-btn" data-time="11:00">11:00</button>
+                                <button class="time-btn" data-time="12:00">12:00</button>
+                                <button class="time-btn" data-time="13:00">13:00</button>
+                                <button class="time-btn" data-time="14:00">14:00</button>
+                                <button class="time-btn" data-time="15:00">15:00</button>
+                                <button class="time-btn" data-time="16:00">16:00</button>
+                                <button class="time-btn" data-time="17:00">17:00</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="classroom-select">강의실</label>
+                            <select id="classroom-select">
+                                <option value="">전체 강의실</option>
+                            </select>
+                        </div>
+                        <button class="btn" id="search-button">검색</button>
+                    </div>
+                </div>
+                <div id="search-results"></div>
+            </section>
+
+            <!-- 실시간 현황(홈) 섹션 -->
+            <section id="home">
+                <h1 class="section-title">🏠 실시간 현황</h1>
+                <div id="current-stats"></div>
+                <div id="current-rooms"></div>
+            </section>
+
+            <!-- 점심 룰렛 섹션 -->
+            <section id="roulette" class="section-hidden">
+                <h1 class="section-title">🍔 점심 룰렛</h1>
+                <div style="text-align: center;">
+                    <p style="font-size: 1.2rem; margin-bottom: 30px; color: #666;">
+                        오늘 점심 메뉴를 정하지 못하셨나요?<br>
+                        룰렛을 돌려서 맛있는 점심을 추천받아보세요!
+                    </p>
+                    <button class="btn btn-large" id="roulette-button">🎰 룰렛 돌리기</button>
+                </div>
+                <div id="roulette-result"></div>
+            </section>
+
+            <!-- 건물별 시간표 섹션 완전 삭제 -->
+        </main>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
+
