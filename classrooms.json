@@ -1,0 +1,1262 @@
+[
+  {
+    "building": "21세기관",
+    "room": "P202"
+  },
+  {
+    "building": "21세기관",
+    "room": "P203"
+  },
+  {
+    "building": "21세기관",
+    "room": "P302"
+  },
+  {
+    "building": "21세기관",
+    "room": "P304"
+  },
+  {
+    "building": "21세기관",
+    "room": "P305"
+  },
+  {
+    "building": "21세기관",
+    "room": "P306"
+  },
+  {
+    "building": "21세기관",
+    "room": "P307"
+  },
+  {
+    "building": "21세기관",
+    "room": "P308"
+  },
+  {
+    "building": "21세기관",
+    "room": "P309"
+  },
+  {
+    "building": "21세기관",
+    "room": "P310"
+  },
+  {
+    "building": "21세기관",
+    "room": "P311"
+  },
+  {
+    "building": "21세기관",
+    "room": "P312"
+  },
+  {
+    "building": "21세기관",
+    "room": "P313"
+  },
+  {
+    "building": "21세기관",
+    "room": "P314"
+  },
+  {
+    "building": "21세기관",
+    "room": "P322"
+  },
+  {
+    "building": "21세기관",
+    "room": "P323"
+  },
+  {
+    "building": "21세기관",
+    "room": "P331"
+  },
+  {
+    "building": "21세기관",
+    "room": "P332"
+  },
+  {
+    "building": "21세기관",
+    "room": "P333"
+  },
+  {
+    "building": "21세기관",
+    "room": "P334"
+  },
+  {
+    "building": "21세기관",
+    "room": "P401"
+  },
+  {
+    "building": "21세기관",
+    "room": "P402"
+  },
+  {
+    "building": "21세기관",
+    "room": "P403"
+  },
+  {
+    "building": "21세기관",
+    "room": "P404"
+  },
+  {
+    "building": "21세기관",
+    "room": "P405"
+  },
+  {
+    "building": "21세기관",
+    "room": "P406"
+  },
+  {
+    "building": "21세기관",
+    "room": "P407"
+  },
+  {
+    "building": "21세기관",
+    "room": "P408"
+  },
+  {
+    "building": "21세기관",
+    "room": "P409"
+  },
+  {
+    "building": "21세기관",
+    "room": "P410"
+  },
+  {
+    "building": "21세기관",
+    "room": "P411"
+  },
+  {
+    "building": "21세기관",
+    "room": "P412"
+  },
+  {
+    "building": "21세기관",
+    "room": "P413"
+  },
+  {
+    "building": "21세기관",
+    "room": "P414"
+  },
+  {
+    "building": "21세기관",
+    "room": "P419"
+  },
+  {
+    "building": "21세기관",
+    "room": "P420"
+  },
+  {
+    "building": "21세기관",
+    "room": "P502"
+  },
+  {
+    "building": "21세기관",
+    "room": "P503"
+  },
+  {
+    "building": "21세기관",
+    "room": "P504"
+  },
+  {
+    "building": "21세기관",
+    "room": "P505"
+  },
+  {
+    "building": "21세기관",
+    "room": "P507"
+  },
+  {
+    "building": "21세기관",
+    "room": "P508"
+  },
+  {
+    "building": "21세기관",
+    "room": "P509"
+  },
+  {
+    "building": "21세기관",
+    "room": "P510"
+  },
+  {
+    "building": "21세기관",
+    "room": "P511"
+  },
+  {
+    "building": "21세기관",
+    "room": "P512"
+  },
+  {
+    "building": "21세기관",
+    "room": "P514"
+  },
+  {
+    "building": "21세기관",
+    "room": "P515"
+  },
+  {
+    "building": "21세기관",
+    "room": "P516"
+  },
+  {
+    "building": "21세기관",
+    "room": "P517-2"
+  },
+  {
+    "building": "21세기관",
+    "room": "P518"
+  },
+  {
+    "building": "21세기관",
+    "room": "P524"
+  },
+  {
+    "building": "21세기관지하",
+    "room": "PU100"
+  },
+  {
+    "building": "21세기관지하",
+    "room": "PU101"
+  },
+  {
+    "building": "505",
+    "room": "505-1"
+  },
+  {
+    "building": "AU",
+    "room": "AU104"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP102"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP304"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP305"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP401-1"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP501-1"
+  },
+  {
+    "building": "SMART배재관",
+    "room": "SP502"
+  },
+  {
+    "building": "ZY",
+    "room": "ZY004"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G102"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G103"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G104"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G105"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G108"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G111"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G114"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G119"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G121"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G122"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G123"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G206"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G209"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G301-2"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G301-3"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G301-5"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G302"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G304"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G305"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G308"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G309"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G310"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G312"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G412"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G414"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G415"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G505"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G513"
+  },
+  {
+    "building": "국제교류관",
+    "room": "G514"
+  },
+  {
+    "building": "국제언어생활관지하",
+    "room": "PAU103"
+  },
+  {
+    "building": "국제언어생활관지하",
+    "room": "PAU104"
+  },
+  {
+    "building": "국제언어생활관지하",
+    "room": "PAU105"
+  },
+  {
+    "building": "국제언어생활관지하",
+    "room": "PAU204"
+  },
+  {
+    "building": "김옥균관(학군단)",
+    "room": "K301"
+  },
+  {
+    "building": "김옥균관(학군단)",
+    "room": "K302"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC103"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC207"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC208"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC307"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC308"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC312"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC313"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC314"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC315"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC407"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC408"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC412"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC413"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC414"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC415"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC507"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC512"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC513"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC514"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC515"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC608"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC608-1"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC612"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC613"
+  },
+  {
+    "building": "미래창조관",
+    "room": "MC615"
+  },
+  {
+    "building": "백산관",
+    "room": "B101"
+  },
+  {
+    "building": "백산관",
+    "room": "B209"
+  },
+  {
+    "building": "백산관",
+    "room": "B301"
+  },
+  {
+    "building": "백산관",
+    "room": "B302"
+  },
+  {
+    "building": "백산관",
+    "room": "B304"
+  },
+  {
+    "building": "백산관",
+    "room": "B305"
+  },
+  {
+    "building": "백산관",
+    "room": "B306"
+  },
+  {
+    "building": "백산관",
+    "room": "B308"
+  },
+  {
+    "building": "소월관",
+    "room": "S101"
+  },
+  {
+    "building": "소월관",
+    "room": "S102"
+  },
+  {
+    "building": "소월관",
+    "room": "S205"
+  },
+  {
+    "building": "소월관",
+    "room": "S205-1"
+  },
+  {
+    "building": "소월관",
+    "room": "S305"
+  },
+  {
+    "building": "소월관",
+    "room": "S405"
+  },
+  {
+    "building": "소월관",
+    "room": "S501"
+  },
+  {
+    "building": "소월관",
+    "room": "S505"
+  },
+  {
+    "building": "소월관",
+    "room": "S508"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A113"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A114"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A115"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A116"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A117"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A205"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A206"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A209"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A211"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A311"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A314"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A319"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A320"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A414"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A516"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A516-1"
+  },
+  {
+    "building": "아펜젤러관",
+    "room": "A520"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM101"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM104"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM105"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM106"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM108"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM208"
+  },
+  {
+    "building": "아펜젤러기념관",
+    "room": "AM209"
+  },
+  {
+    "building": "예술관",
+    "room": "Y101"
+  },
+  {
+    "building": "예술관",
+    "room": "Y102"
+  },
+  {
+    "building": "예술관",
+    "room": "Y103"
+  },
+  {
+    "building": "예술관",
+    "room": "Y104"
+  },
+  {
+    "building": "예술관",
+    "room": "Y105"
+  },
+  {
+    "building": "예술관",
+    "room": "Y108"
+  },
+  {
+    "building": "예술관",
+    "room": "Y109"
+  },
+  {
+    "building": "예술관",
+    "room": "Y110"
+  },
+  {
+    "building": "예술관",
+    "room": "Y110-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y110-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y111"
+  },
+  {
+    "building": "예술관",
+    "room": "Y112"
+  },
+  {
+    "building": "예술관",
+    "room": "Y209"
+  },
+  {
+    "building": "예술관",
+    "room": "Y301"
+  },
+  {
+    "building": "예술관",
+    "room": "Y302"
+  },
+  {
+    "building": "예술관",
+    "room": "Y303"
+  },
+  {
+    "building": "예술관",
+    "room": "Y304"
+  },
+  {
+    "building": "예술관",
+    "room": "Y305"
+  },
+  {
+    "building": "예술관",
+    "room": "Y306"
+  },
+  {
+    "building": "예술관",
+    "room": "Y307"
+  },
+  {
+    "building": "예술관",
+    "room": "Y308"
+  },
+  {
+    "building": "예술관",
+    "room": "Y309"
+  },
+  {
+    "building": "예술관",
+    "room": "Y310"
+  },
+  {
+    "building": "예술관",
+    "room": "Y311"
+  },
+  {
+    "building": "예술관",
+    "room": "Y312"
+  },
+  {
+    "building": "예술관",
+    "room": "Y313"
+  },
+  {
+    "building": "예술관",
+    "room": "Y314"
+  },
+  {
+    "building": "예술관",
+    "room": "Y315"
+  },
+  {
+    "building": "예술관",
+    "room": "Y405"
+  },
+  {
+    "building": "예술관",
+    "room": "Y406"
+  },
+  {
+    "building": "예술관",
+    "room": "Y407"
+  },
+  {
+    "building": "예술관",
+    "room": "Y412"
+  },
+  {
+    "building": "예술관",
+    "room": "Y413"
+  },
+  {
+    "building": "예술관",
+    "room": "Y414"
+  },
+  {
+    "building": "예술관",
+    "room": "Y415"
+  },
+  {
+    "building": "예술관",
+    "room": "Y416"
+  },
+  {
+    "building": "예술관",
+    "room": "Y417-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y417-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y423"
+  },
+  {
+    "building": "예술관",
+    "room": "Y424-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y424-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y425"
+  },
+  {
+    "building": "예술관",
+    "room": "Y425-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y425-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y501"
+  },
+  {
+    "building": "예술관",
+    "room": "Y502"
+  },
+  {
+    "building": "예술관",
+    "room": "Y504"
+  },
+  {
+    "building": "예술관",
+    "room": "Y505"
+  },
+  {
+    "building": "예술관",
+    "room": "Y506"
+  },
+  {
+    "building": "예술관",
+    "room": "Y507"
+  },
+  {
+    "building": "예술관",
+    "room": "Y508"
+  },
+  {
+    "building": "예술관",
+    "room": "Y513"
+  },
+  {
+    "building": "예술관",
+    "room": "Y514"
+  },
+  {
+    "building": "예술관",
+    "room": "Y515"
+  },
+  {
+    "building": "예술관",
+    "room": "Y516"
+  },
+  {
+    "building": "예술관",
+    "room": "Y521"
+  },
+  {
+    "building": "예술관",
+    "room": "Y522"
+  },
+  {
+    "building": "예술관",
+    "room": "Y522-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y524"
+  },
+  {
+    "building": "예술관",
+    "room": "Y525"
+  },
+  {
+    "building": "예술관",
+    "room": "Y534"
+  },
+  {
+    "building": "예술관",
+    "room": "Y535-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y535-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y536"
+  },
+  {
+    "building": "예술관",
+    "room": "Y537-1"
+  },
+  {
+    "building": "예술관",
+    "room": "Y537-2"
+  },
+  {
+    "building": "예술관",
+    "room": "Y538"
+  },
+  {
+    "building": "예술관",
+    "room": "Y540"
+  },
+  {
+    "building": "우남관",
+    "room": "W105-2"
+  },
+  {
+    "building": "우남관",
+    "room": "W105-3"
+  },
+  {
+    "building": "우남관",
+    "room": "W106"
+  },
+  {
+    "building": "우남관",
+    "room": "W210"
+  },
+  {
+    "building": "우남관",
+    "room": "W219"
+  },
+  {
+    "building": "우남관",
+    "room": "W223"
+  },
+  {
+    "building": "우남관",
+    "room": "W224"
+  },
+  {
+    "building": "우남관",
+    "room": "W303"
+  },
+  {
+    "building": "우남관",
+    "room": "W305"
+  },
+  {
+    "building": "우남관",
+    "room": "W307"
+  },
+  {
+    "building": "우남관",
+    "room": "W308"
+  },
+  {
+    "building": "우남관",
+    "room": "W309"
+  },
+  {
+    "building": "우남관",
+    "room": "W310"
+  },
+  {
+    "building": "우남관",
+    "room": "W311"
+  },
+  {
+    "building": "우남관",
+    "room": "W312"
+  },
+  {
+    "building": "우남관",
+    "room": "W401"
+  },
+  {
+    "building": "우남관",
+    "room": "W403"
+  },
+  {
+    "building": "우남관",
+    "room": "W404"
+  },
+  {
+    "building": "우남관",
+    "room": "W405"
+  },
+  {
+    "building": "우남관",
+    "room": "W406"
+  },
+  {
+    "building": "우남관",
+    "room": "W407"
+  },
+  {
+    "building": "우남관",
+    "room": "W409"
+  },
+  {
+    "building": "우남관",
+    "room": "W410"
+  },
+  {
+    "building": "우남관",
+    "room": "W411"
+  },
+  {
+    "building": "우남관",
+    "room": "W412"
+  },
+  {
+    "building": "우남관",
+    "room": "W413"
+  },
+  {
+    "building": "우남관",
+    "room": "W414"
+  },
+  {
+    "building": "우남관",
+    "room": "W415"
+  },
+  {
+    "building": "우남관",
+    "room": "W416"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J113"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J114"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J116-1"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J123"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J126"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J201"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J202"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J205"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J209"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J213"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J214"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J215"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J215-1"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J216"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J223"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J305"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J313"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J315"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J316"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J319"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J325"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J326"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J330"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J333"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J413"
+  },
+  {
+    "building": "자연과학관",
+    "room": "J416"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C201"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C202"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C203"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C204"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C205"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C206"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C301"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C305"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C401"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C402"
+  },
+  {
+    "building": "정보과학관",
+    "room": "C501"
+  },
+  {
+    "building": "하워드관",
+    "room": "H107"
+  },
+  {
+    "building": "하워드관",
+    "room": "H110"
+  },
+  {
+    "building": "하워드관",
+    "room": "H111"
+  },
+  {
+    "building": "하워드관",
+    "room": "H209"
+  },
+  {
+    "building": "하워드관",
+    "room": "H311"
+  },
+  {
+    "building": "하워드관",
+    "room": "H411"
+  },
+  {
+    "building": "하워드관",
+    "room": "H412"
+  },
+  {
+    "building": "하워드관",
+    "room": "H413"
+  },
+  {
+    "building": "하워드관",
+    "room": "H509"
+  },
+  {
+    "building": "하워드관",
+    "room": "H510"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM304"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM307"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM308"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM406"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM410"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM415"
+  },
+  {
+    "building": "하워드기념관",
+    "room": "HM416"
+  }
+]

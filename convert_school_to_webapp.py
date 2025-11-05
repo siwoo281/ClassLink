@@ -168,6 +168,11 @@ def main():
         credit = item.get('학점', '').strip()
         classroom_time = item.get('강의실/강의시간', '').strip()
         
+        try:
+            student_count = int(item.get('수강\n인원', '0').strip())
+        except (ValueError, TypeError):
+            student_count = 0
+        
         if not code or not subject:
             skipped += 1
             continue
@@ -191,7 +196,8 @@ def main():
                 'classroom': '',
                 'building_code': '',
                 'building_name': '',
-                'department': ''  # 개설강좌 리스트에는 학과 정보 없음
+                'department': '',  # 개설강좌 리스트에는 학과 정보 없음
+                'student_count': student_count
             })
         else:
             # 각 시간 슬롯마다 별도 레코드 생성
@@ -212,17 +218,18 @@ def main():
                     'classroom': slot['classroom'],
                     'building_code': building_code,
                     'building_name': building_name,
-                    'department': ''
+                    'department': '',
+                    'student_count': student_count
                 })
     
     print(f"변환 완료: {len(converted)}개 레코드")
     print(f"스킵: {skipped}개")
     
     # 저장
-    with open('timetable_project.json', 'w', encoding='utf-8') as f:
+    with open('timetable_flat.json', 'w', encoding='utf-8') as f:
         json.dump(converted, f, ensure_ascii=False, indent=2)
     
-    print(f"\n✅ timetable_project.json 생성 완료!")
+    print(f"\n✅ timetable_flat.json 생성 완료!")
     
     # 통계
     from collections import Counter

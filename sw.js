@@ -1,13 +1,52 @@
-// Minimal no-op service worker to silence 404s and allow future enhancements.
+const CACHE_NAME = 'campus-helper-cache-v2';
+const urlsToCache = [
+    '/',
+    '/app.html',
+    '/style.css',
+    '/script.js',
+    '/timetable_flat.json',
+    '/professors.json',
+    '/classrooms.json'
+];
+
 self.addEventListener('install', (event) => {
-  // Activate immediately after installation
-  self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                console.log('Opened cache');
+                return cache.addAll(urlsToCache);
+            })
+    );
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  // Take control of uncontrolled clients asap
-  event.waitUntil(self.clients.claim());
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
 });
 
-// No caching or special handling; just a pass-through
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request)
+            .then((response) => {
+                // Cache hit - return response
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request);
+            }
+        )
+    );
+});
 

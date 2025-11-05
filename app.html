@@ -51,9 +51,29 @@
             <!-- 캠퍼스 혼잡도 섹션 -->
             <section id="heatmap" class="section-hidden">
                 <h1 class="section-title">📊 캠퍼스 혼잡도</h1>
+                
+                <!-- 정보 요약 및 필터 -->
+                <div id="heatmap-info-summary"></div>
+                <div class="search-form-container department-filter-container">
+                    <div class="form-group">
+                        <label for="department-filter-select">학과별 핫스팟 보기</label>
+                        <select id="department-filter-select">
+                            <option value="">전체 보기</option>
+                            <!-- 학과 목록은 JS에서 동적으로 채웁니다 -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 혼잡도 랭킹 -->
+                <div id="building-congestion-ranking" style="width:100%;max-width:700px;margin:0 auto 20px auto;"></div>
+                
+                <!-- 히트맵 차트 -->
                 <div style="width:100%;max-width:700px;margin:0 auto;">
                     <canvas id="heatmap-chart" style="width:100%;height:400px;"></canvas>
                 </div>
+                
+                <!-- 건물별 특성 정보 -->
+                <div id="building-feature-info" style="width:100%;max-width:700px;margin:20px auto 0 auto;"></div>
             </section>
             <!-- 스케줄 조회 섹션 -->
             <section id="schedule" class="section-hidden">
@@ -183,7 +203,27 @@
         </main>
     </div>
 
-    <script src="script.js" defer></script>
+        <script src="script.js?v=1672531200000"></script>
+    <script>
+        // Cache-busting: Append current timestamp to script src
+        const scriptTag = document.querySelector('script[src^="script.js"]');
+        if (scriptTag) {
+            scriptTag.src = `script.js?v=${new Date().getTime()}`;
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
 

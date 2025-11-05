@@ -2,7 +2,7 @@ import json
 import re
 from collections import Counter
 
-INPUT = "timetable.json"
+INPUT = "개설강좌 리스트.json"
 OUTPUT = "timetable_flat.json"
 
 code_title_pattern = re.compile(r"^(?P<code>[A-Z]{3}\d{5})\s+(?P<title>.+)$")
@@ -42,6 +42,14 @@ def normalize_record(rec: dict) -> dict:
     rec["code"] = code
     rec["subject"] = subject
     rec["professor"] = professor
+
+    # Add student count, handling potential errors
+    try:
+        # The key in the source file is "수강\n인원"
+        student_count_str = clean_text(rec.get("수강\n인원", "0"))
+        rec["student_count"] = int(student_count_str) if student_count_str else 0
+    except (ValueError, TypeError):
+        rec["student_count"] = 0
 
     # Normalize classroom/building fields to empty string if None
     for k in ["classroom", "building_code", "building_name", "department", "college", "day", "start", "end"]:
