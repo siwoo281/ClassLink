@@ -66,9 +66,25 @@ def convert_timetable_data():
                 continue
 
             # Try to match format: "J202(목A)"
-            match1 = re.match(r'([\w.-]+)\s*\(([\uac00-\ud7a3])([\w\d]+)\)', part)
+            match1 = re.match(r'([\w.-]+)\s*\(([\uac00-\ud7a3])([A-Z\d])\)', part)
             if match1:
                 classroom, day_kor, period = match1.groups()
+                day_eng = DAY_MAP.get(day_kor)
+                time_info = PERIOD_MAP.get(period.upper())
+                if day_eng and time_info:
+                    slots.append({
+                        "day": day_eng,
+                        "start": time_info["start"],
+                        "end": calculate_end_time(time_info["start"], time_info["duration"]),
+                        "classroom": classroom,
+                        "building_name": get_building_name(classroom)
+                    })
+                continue
+
+            # Try to match format: "화E(P203)"
+            match3 = re.match(r'([\uac00-\ud7a3])([A-Z\d])\(([\w.-]+)\)', part)
+            if match3:
+                day_kor, period, classroom = match3.groups()
                 day_eng = DAY_MAP.get(day_kor)
                 time_info = PERIOD_MAP.get(period.upper())
                 if day_eng and time_info:

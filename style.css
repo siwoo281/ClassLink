@@ -747,60 +747,146 @@
 }
 
 /* ===== 혼잡도 페이지 개선 스타일 ===== */
-.congestion-card, .feature-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    padding: 12px 15px;
-    transition: all 0.2s ease-in-out;
-}
-
-.congestion-card {
+.section-subtitle {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-.congestion-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-    cursor: pointer;
-}
-
-.congestion-emoji { font-size: 1.5rem; }
-.congestion-title { font-weight: 600; font-size: 1rem; flex-grow: 1; }
-.congestion-desc { font-size: 0.9rem; color: #555; }
-
-.congestion-ranking-wrap {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-.congestion-ranking-block { display: flex; flex-direction: column; gap: 10px; }
-.congestion-ranking-title { font-weight: 600; margin-bottom: 5px; font-size: 1.1rem; }
-.congestion-ranking-cards { display: flex; flex-direction: column; gap: 8px; }
+.section-subtitle h2 {
+    margin: 0;
+}
+
+.timestamp {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+}
+
+.congestion-ranking-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.ranking-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ranking-title {
+    font-weight: 700;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.congestion-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    padding: 12px 15px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 0 15px;
+    border-left: 5px solid transparent;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.congestion-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.congestion-card.selected {
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+}
+
+.rank-badge {
+    grid-row: 1 / -1;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.building-name {
+    grid-column: 2;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.student-count {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    justify-self: end;
+}
+
+.congestion-badge {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
 
 .feature-info-wrap {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
+    background: #f8f9ff;
+    padding: 20px;
+    border-radius: 10px;
 }
-.feature-info-title {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e2e8f0;
+
+.feature-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 15px;
 }
-.feature-card .feature-label { font-weight: 600; color: #4a5568; }
-.feature-card .feature-content { margin-top: 5px; font-size: 0.9rem; color: #718096; }
+
+.feature-title {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 10px;
+}
+
+.feature-list {
+    font-size: 0.9rem;
+    color: #718096;
+    line-height: 1.6;
+}
+
+.feature-list span {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 2px;
+}
 
 .example-notice, .peak-time-info {
-    background-color: #e6f7ff;
-    border: 1px solid #91d5ff;
-    color: #0050b3;
-    padding: 12px;
+    background-color: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #4338ca;
+    padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
     text-align: center;
@@ -1310,5 +1396,120 @@ body.modal-open {
     .building-title {
         font-size: 1.4rem;
         padding: 20px 25px;
+    }
+}
+
+/* --- Landing Page Styles --- */
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landing-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #7b8cff, #8f6fd8, #7b8cff);
+    background-size: 200% 200%;
+    padding: 20px;
+    animation: gradient-animation 15s ease infinite;
+}
+
+.landing-container > * {
+    animation: fade-in-up 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.landing-main-title { animation-delay: 0.2s; }
+.landing-headline { animation-delay: 0.4s; }
+.landing-body { animation-delay: 0.6s; }
+.landing-cta { animation-delay: 0.8s; }
+
+.landing-container {
+    text-align: center;
+    max-width: 600px;
+    width: 90vw;
+    margin: 0 auto;
+}
+
+.landing-main-title {
+    font-size: 3.1rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 12px;
+    color: white;
+    text-shadow: 0 2px 16px rgba(80, 80, 160, 0.10);
+}
+
+.landing-headline {
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 30px;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 8px rgba(80, 80, 160, 0.1);
+}
+
+.landing-body {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.7;
+    margin: 0 auto 16px auto;
+    max-width: 480px;
+}
+
+.landing-body:last-of-type {
+    margin-bottom: 40px;
+}
+
+.landing-cta {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 20px 0;
+    width: 90%;
+    max-width: 300px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: white;
+    color: #6a5acd;
+    border-radius: 32px;
+    box-shadow: 0 4px 24px rgba(80, 80, 160, 0.13);
+    text-align: center;
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.landing-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(80, 80, 160, 0.2);
+}
+
+@media (max-width: 480px) {
+    .landing-main-title {
+        font-size: 2.5rem;
+    }
+    .landing-headline {
+        font-size: 1.5rem;
+    }
+    .landing-body {
+        font-size: 1rem;
+    }
+    .landing-cta {
+        padding: 18px 0;
+        font-size: 1.1rem;
     }
 }

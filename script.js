@@ -5,44 +5,57 @@ function renderBuildingFeatureInfo() {
 }
 
 // ===== 현재 시간 기준 TOP3 붐비는/한산한 건물 표시 =====
+// 혼잡도 랭킹 카드 렌더링
 function renderBuildingCongestionRanking() {
     const now = new Date();
     const { congestion } = calculateBuildingStatsForTime(now);
     const sorted = congestion.sort((a, b) => b[1] - a[1]);
+    
+    // 실시간 기준 시각 업데이트
+    const timestampEl = document.getElementById('ranking-timestamp');
+    if (timestampEl) {
+        timestampEl.textContent = `(${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} 기준)`;
+    }
+
     const top = sorted.slice(0, 3);
-    const bottom = sorted.slice(-3).reverse();
+    const bottom = sorted.length > 3 ? sorted.slice(-3).reverse() : [];
     const rankingDiv = document.getElementById('building-congestion-ranking');
     if (!rankingDiv) return;
+
     if (sorted.length === 0) {
-        rankingDiv.innerHTML = '<div class="example-notice">현재 시간에 수업이 없습니다.<br>예시: <b>09:00~10:00</b>에 확인해보세요!</div>';
+        rankingDiv.innerHTML = '<div class="example-notice">현재 시간에 진행 중인 수업이 없습니다.<br>예시: <b>평일 10:00</b>에 확인해보세요!</div>';
         return;
     }
+
     rankingDiv.innerHTML = `
         <div class="congestion-ranking-wrap">
             <div class="ranking-block">
-                <div class="ranking-title">혼잡 TOP 3</div>
-                ${top.map(([b, c], i) => {
-                    const level = getCongestionLevel(c);
-                    return `<div class="congestion-card" style="border-color:${level.color}">
-                        <span class="rank-badge">${i+1}</span>
-                        <span class="building-name">${b}</span>
-                        <span class="congestion-badge" style="background:${level.color}">${level.emoji} ${level.level}</span>
-                        <span class="student-count">${c}명</span>
+                <div class="ranking-title">🔥 혼잡 TOP 3</div>
+                ${top.map(([building, count], i) => {
+                    const level = getCongestionLevel(count);
+                    return `<div class="congestion-card" data-building="${building}" style="border-left-color:${level.color};">
+                        <span class="rank-badge" style="background-color:${level.color};">${i + 1}</span>
+                        <span class="building-name">${building}</span>
+                        <span class="student-count">${count}명</span>
+                        <span class="congestion-badge" style="color:${level.color};">${level.emoji} ${level.level}</span>
                     </div>`;
                 }).join('')}
             </div>
+            ${bottom.length > 0 ? `
             <div class="ranking-block">
-                <div class="ranking-title">여유 TOP 3</div>
-                ${bottom.map(([b, c], i) => {
-                    const level = getCongestionLevel(c);
-                    return `<div class="congestion-card" style="border-color:${level.color}">
-                        <span class="rank-badge">${sorted.length - bottom.length + i + 1}</span>
-                        <span class="building-name">${b}</span>
-                        <span class="congestion-badge" style="background:${level.color}">${level.emoji} ${level.level}</span>
-                        <span class="student-count">${c}명</span>
+                <div class="ranking-title">🟢 여유 TOP 3</div>
+                ${bottom.map(([building, count], i) => {
+                    const level = getCongestionLevel(count);
+                    const rank = sorted.length - bottom.length + i + 1;
+                    return `<div class="congestion-card" data-building="${building}" style="border-left-color:${level.color};">
+                        <span class="rank-badge" style="background-color:${level.color};">${rank}</span>
+                        <span class="building-name">${building}</span>
+                        <span class="student-count">${count}명</span>
+                        <span class="congestion-badge" style="color:${level.color};">${level.emoji} ${level.level}</span>
                     </div>`;
                 }).join('')}
             </div>
+            ` : ''}
         </div>
     `;
 }
@@ -71,32 +84,6 @@ function renderBuildingFeatureInfo(buildingName) {
             </div>
         </div>
     `;
-}
-
-// 혼잡도, 특성, 피크타임 등 heatmap 섹션 초기화
-function initializeHeatmapFeatures() {
-    // 혼잡도 랭킹
-    renderBuildingCongestionRanking();
-    // 건물별 특성 정보 (초기값: 첫 번째 건물)
-    const rankingDiv = document.getElementById('building-congestion-ranking');
-    if (rankingDiv) {
-        rankingDiv.onclick = function(e) {
-            const card = e.target.closest('.congestion-card');
-            if (card) {
-                const building = card.querySelector('.building-name').textContent;
-                renderBuildingFeatureInfo(building);
-            }
-        };
-    }
-    // 피크타임 정보
-    renderPeakTimeInfo();
-    // 학과별 혼잡도 필터
-    const deptSelect = document.getElementById('heatmap-dept-select');
-    if (deptSelect) {
-        deptSelect.onchange = function() {
-            renderHeatmapChart();
-        };
-    }
 }
 
 // 피크타임 정보 렌더링
@@ -129,6 +116,56 @@ function renderPeakTimeInfo() {
     const [peakDay, peakHour] = peakKey.split('_');
     const dayKor = dayNameMap[peakDay] || peakDay;
     infoDiv.innerHTML = `<div class="peak-time-info">가장 붐비는 시간: <b>${dayKor}요일 ${peakHour}:00</b> (${peakValue}명)</div>`;
+}
+
+// 혼잡도, 특성, 피크타임 등 heatmap 섹션 초기화
+function initializeHeatmapFeatures() {
+    renderBuildingCongestionRanking();
+    renderPeakTimeInfo();
+
+    const rankingDiv = document.getElementById('building-congestion-ranking');
+    if (rankingDiv) {
+        rankingDiv.onclick = function(e) {
+            const card = e.target.closest('.congestion-card');
+            if (card) {
+                const building = card.dataset.building;
+                
+                // 모든 카드에서 'selected' 클래스 제거
+                rankingDiv.querySelectorAll('.congestion-card').forEach(c => c.classList.remove('selected'));
+                // 클릭된 카드에 'selected' 클래스 추가
+                card.classList.add('selected');
+
+                // 건물별 특성 정보 렌더링
+                renderBuildingFeatureInfo(building);
+
+                // 히트맵 건물 필터 업데이트 및 차트 다시 그리기
+                const buildingSelect = document.getElementById('heatmap-building-select');
+                if (buildingSelect) {
+                    buildingSelect.value = building;
+                    renderHeatmapChart();
+                }
+            }
+        };
+    }
+
+    const deptSelect = document.getElementById('heatmap-dept-select');
+    if (deptSelect) {
+        deptSelect.onchange = function() {
+            renderHeatmapChart();
+        };
+    }
+    
+    const buildingSelect = document.getElementById('heatmap-building-select');
+    if(buildingSelect) {
+        buildingSelect.onchange = () => {
+            // 필터 변경 시, 랭킹 카드 선택 상태 초기화
+            if (rankingDiv) {
+                 rankingDiv.querySelectorAll('.congestion-card').forEach(c => c.classList.remove('selected'));
+            }
+            document.getElementById('building-feature-info').innerHTML = '<div class="example-notice">랭킹 카드를 클릭하여 건물별 특성을 확인하세요.</div>';
+            renderHeatmapChart();
+        };
+    }
 }
 
 // 혼잡도 등급 산정 및 매핑 함수
@@ -195,10 +232,11 @@ async function loadTimetableData() {
         loadingIndicator.classList.add('loading-visible');
         
         // 모든 데이터를 병렬로 비동기 로드
+        const v = new Date().getTime();
         const [timetableRes, professorsRes, classroomsRes] = await Promise.all([
-            fetch('timetable_flat.json'),
-            fetch('professors.json'),
-            fetch('classrooms.json')
+            fetch(`timetable.json?v=${v}`),
+            fetch(`professors.json?v=${v}`),
+            fetch(`classrooms.json?v=${v}`)
         ]);
 
         if (!timetableRes.ok || !professorsRes.ok || !classroomsRes.ok) {
@@ -313,9 +351,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // URL 해시에 따라 초기 섹션 설정
-    const initialSection = window.location.hash.substring(1) || 'home';
-    setActiveSection(initialSection);
+
+    // 해시 기반 진입 및 해시 변경 시 섹션 자동 활성화
+    function setActiveSectionFromHash() {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+            setActiveSection(hash);
+        } else {
+            setActiveSection('home');
+        }
+    }
+    setActiveSectionFromHash();
+    window.addEventListener('hashchange', setActiveSectionFromHash);
 
     // --- 이벤트 리스너 단일 등록 ---
     initializeRealTimeSection();
@@ -323,6 +370,38 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeScheduleSection();
     initializeRouletteSection();
 });
+
+function initializeScheduleSection() {
+    const scheduleType = document.getElementById('schedule-type');
+    const searchInputGroup = document.getElementById('search-input-group');
+    const professorSelectGroup = document.getElementById('professor-select-group');
+    const classroomSelectGroup = document.getElementById('schedule-classroom-select-group');
+    const searchButton = document.getElementById('schedule-search-button');
+    const resultsContainer = document.getElementById('schedule-results');
+    const onlineCoursesContainer = document.getElementById('online-courses-list');
+
+    scheduleType.addEventListener('change', function() {
+        searchInputGroup.style.display = 'none';
+        professorSelectGroup.style.display = 'none';
+        classroomSelectGroup.style.display = 'none';
+
+        switch (this.value) {
+            case 'professor':
+                professorSelectGroup.style.display = 'block';
+                break;
+            case 'classroom':
+                classroomSelectGroup.style.display = 'block';
+                break;
+            default:
+                searchInputGroup.style.display = 'block';
+                break;
+        }
+    });
+
+    searchButton.addEventListener('click', function() {
+        // 검색 로직 구현
+    });
+}
 
 function initializeRealTimeSection() {
     const roomsContainer = document.getElementById('current-rooms');
@@ -787,7 +866,7 @@ function initializeProfessorSection() {
             return;
         }
 
-        const classes = timetableData.filter(item => (item.professor || '').includes(name));
+    const classes = timetableData.filter(item => (item.professor || '').includes(name));
         if (classes.length === 0) {
             resultsDiv.innerHTML = '<div class="card"><div class="card-content">해당 교수님의 강의 정보가 없습니다.</div></div>';
             return;
