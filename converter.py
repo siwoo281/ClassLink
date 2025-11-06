@@ -130,13 +130,21 @@ def convert_timetable_data():
 
     converted_data = []
     for record in raw_data:
+        # 수강 인원 값의 유효성 검사 및 변환
+        student_count_str = (record.get("수강\n인원") or "0").strip()
+        try:
+            student_count = int(student_count_str)
+        except ValueError:
+            student_count = 0
+
         base_info = {
             "code": record.get("과목코드", "").strip(),
             "subject": record.get("과목명", "").strip(),
             "professor": record.get("담당교수", "").strip(),
             "credits": record.get("학점", "0").strip(),
             "department": record.get("이수\n구분", "").strip(),
-            "class_number": record.get("분반", "").strip()
+            "class_number": record.get("분반", "").strip(),
+            "student_count": student_count
         }
 
         time_slots_str = record.get("강의실/강의시간", "")
