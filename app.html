@@ -22,7 +22,6 @@
                     <li><a class="nav-link active" data-target="home">🏠 실시간 현황</a></li>
                     <li><a class="nav-link" data-target="search">🔍 빈 강의실 검색</a></li>
                     <li><a class="nav-link" data-target="schedule">🗓️ 스케줄 조회</a></li>
-                        <li><a class="nav-link" data-target="professor-timetable">👨‍🏫 교수님 관련</a></li>
                     <li><a class="nav-link" data-target="heatmap">📊 캠퍼스 혼잡도</a></li>
                     <li><a class="nav-link" data-target="roulette">🍔 점심 룰렛</a></li>
                     <!-- 건물별 시간표 탭 삭제 -->
@@ -31,35 +30,23 @@
         </nav>
 
         <main>
-            <!-- 교수별 시간표 조회 섹션 -->
-                            <section id="professor-timetable" class="section-hidden">
-                                <h1 class="section-title">👨‍🏫 교수님별 시간표 조회</h1>
-                                <div class="professor-section-wrap">
-                                    <div class="professor-main-content">
-                                        <div class="form-group">
-                                            <label for="professor-main-select">교수님을 선택하여 시간표와 통계를 확인하세요</label>
-                                            <select id="professor-main-select">
-                                                <option value="">교수님을 선택하세요</option>
-                                            </select>
-                                        </div>
-                                        <div id="professor-main-results">
-                                            <!-- Professor details will be rendered here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
             <!-- 캠퍼스 혼잡도 섹션 -->
             <section id="heatmap" class="section-hidden">
                 <h1 class="section-title">📊 캠퍼스 혼잡도</h1>
                 
                 <!-- 정보 요약 및 필터 -->
                 <div id="heatmap-info-summary"></div>
-                <div class="search-form-container department-filter-container">
+                <div class="search-form-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
                     <div class="form-group">
-                        <label for="department-filter-select">학과별 핫스팟 보기</label>
-                        <select id="department-filter-select">
-                            <option value="">전체 보기</option>
-                            <!-- 학과 목록은 JS에서 동적으로 채웁니다 -->
+                        <label for="heatmap-dept-select">학과별 필터</label>
+                        <select id="heatmap-dept-select">
+                            <option value="">전체 학과</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="heatmap-building-select">건물별 필터</label>
+                        <select id="heatmap-building-select">
+                            <option value="">전체 건물</option>
                         </select>
                     </div>
                 </div>
@@ -73,6 +60,7 @@
                 
                 <!-- 히트맵 차트 -->
                 <div style="width:100%;max-width:700px;margin:0 auto;">
+                    <h2 id="heatmap-chart-title" class="section-subtitle" style="text-align: center; margin-bottom: 15px;"></h2>
                     <canvas id="heatmap-chart" style="width:100%;height:400px;"></canvas>
                 </div>
                 

@@ -1,8 +1,4 @@
 // ===== 건물별 특성(주요 학과, 대표 수업) 추출 및 표시 =====
-function renderBuildingFeatureInfo() {
-    // 이 함수는 이제 renderBuildingCongestionRanking에서 함께 처리됩니다.
-    // 개별 호출이 필요 없어졌으므로 비워두거나 삭제할 수 있습니다.
-}
 
 // ===== 현재 시간 기준 TOP3 붐비는/한산한 건물 표시 =====
 // 혼잡도 랭킹 카드 렌더링
@@ -150,9 +146,7 @@ function initializeHeatmapFeatures() {
 
     const deptSelect = document.getElementById('heatmap-dept-select');
     if (deptSelect) {
-        deptSelect.onchange = function() {
-            renderHeatmapChart();
-        };
+        deptSelect.onchange = renderHeatmapChart;
     }
     
     const buildingSelect = document.getElementById('heatmap-building-select');
@@ -267,17 +261,20 @@ function processLoadedData() {
     }
 
     // 드롭다운 채우기
-    populateDropdown('professor-main-select', professorsList, { placeholder: '교수님을 선택하세요' });
     populateDropdown('professor-select', professorsList, { placeholder: '교수님을 선택하세요' });
     populateDropdown('classroom-select', classroomsList, { placeholder: '전체 강의실', isClassroom: true });
     populateDropdown('schedule-classroom-select', classroomsList, { placeholder: '강의실을 선택하세요', isClassroom: true });
 
-    // Heatmap building select population
+    // Heatmap 필터 채우기
     const buildingSelect = document.getElementById('heatmap-building-select');
     if (buildingSelect) {
         const buildings = [...new Set(classroomsList.map(c => c.building))].sort();
         buildingSelect.innerHTML += buildings.map(b => `<option value="${b}">${b}</option>`).join('');
-        buildingSelect.addEventListener('change', () => renderHeatmapChart());
+    }
+    const deptSelect = document.getElementById('heatmap-dept-select');
+    if (deptSelect) {
+        const departments = [...new Set(timetableData.map(item => item.department).filter(Boolean))].sort();
+        deptSelect.innerHTML += departments.map(d => `<option value="${d}">${d}</option>`).join('');
     }
 
     console.log(`데이터 처리 완료: ${timetableData.length}개 강의, ${professorsList.length}명 교수, ${classroomsList.length}개 강의실`);
@@ -390,7 +387,6 @@ function initializeScheduleSection() {
         const day = dayFilter.value;
         let query = '';
 
-        // 1. 검색 유형에 따라 검색어(query) 설정
         switch (type) {
             case 'professor':
                 query = professorSelect.value;
@@ -399,7 +395,7 @@ function initializeScheduleSection() {
                 query = classroomSelect.value;
                 break;
             case 'missing-professor':
-                query = '미지정'; // 교수명이 비어있는 경우를 찾기 위함
+                query = '미지정';
                 break;
             default:
                 query = searchInput.value.trim().toLowerCase();
@@ -412,21 +408,16 @@ function initializeScheduleSection() {
             return;
         }
 
-        // 2. 데이터 필터링
         let filteredResults = timetableData.filter(item => {
-            // 요일 필터
             if (day && item.day !== day) {
                 return false;
             }
 
-            // 검색 유형별 필터
             switch (type) {
                 case 'subject':
                     return (item.subject || '').toLowerCase().includes(query);
                 case 'professor':
                     return (item.professor || '') === query;
-                case 'department':
-                    return (item.department || '').toLowerCase().includes(query);
                 case 'classroom':
                     const [building, room] = query.split('-');
                     return item.building_name === building && item.classroom === room;
@@ -437,17 +428,14 @@ function initializeScheduleSection() {
             }
         });
 
-        // 3. 결과 렌더링
-        renderScheduleResults(filteredResults);
+        renderScheduleResults(filteredResults, type);
     }
 
-    function renderScheduleResults(results) {
+    function renderScheduleResults(results, searchType) {
         const onlineCourses = results.filter(item => item.day === 'ONLINE');
         const offlineCourses = results.filter(item => item.day !== 'ONLINE');
 
-        // 오프라인 강의 결과 표시
         if (offlineCourses.length > 0) {
-            // 결과를 요일 순, 시작 시간 순으로 정렬
             const dayOrder = { 'MON': 1, 'TUE': 2, 'WED': 3, 'THU': 4, 'FRI': 5, 'SAT': 6 };
             offlineCourses.sort((a, b) => {
                 const dayCompare = (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99);
@@ -455,27 +443,76 @@ function initializeScheduleSection() {
                 return (a.start || '').localeCompare(b.start || '');
             });
 
-            resultsContainer.innerHTML = `
-                <div class="results-summary">총 ${offlineCourses.length}개의 오프라인 강의가 검색되었습니다.</div>
-                <div class="card-grid schedule-grid">
-                    ${offlineCourses.map(item => `
-                        <div class="card schedule-card">
-                            <div class="card-title">${item.subject}</div>
-                            <div class="card-content">
-                                <div class="schedule-info"><b>교수:</b> ${getProfessorDisplay(item)}</div>
-                                <div class="schedule-info"><b>시간:</b> ${dayNameMap[item.day] || item.day} ${item.start}~${item.end}</div>
-                                <div class="schedule-info"><b>강의실:</b> ${getRoomDisplay(item)}</div>
-                                <div class="schedule-info"><b>이수:</b> ${item.department || '-'} / <b>학점:</b> ${item.credits || '-'}</div>
-                            </div>
+            let html = `<div class="results-summary">총 ${offlineCourses.length}개의 오프라인 강의가 검색되었습니다.</div>`;
+
+            // 교수명 검색 시 통계 정보 추가
+            if (searchType === 'professor' && offlineCourses.length > 0) {
+                const professorName = getProfessorDisplay(offlineCourses[0]);
+                const amClasses = offlineCourses.filter(c => c.start < '12:00').length;
+                const pmClasses = offlineCourses.filter(c => c.start >= '12:00').length;
+                const dayCounts = offlineCourses.reduce((acc, c) => {
+                    acc[c.day] = (acc[c.day] || 0) + 1; return acc;
+                }, {});
+                let busiestDay = '없음', maxCount = 0;
+                Object.entries(dayCounts).forEach(([day, count]) => {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        busiestDay = `${dayNameMap[day]}요일 (${count}개)`;
+                    }
+                });
+                const classroomCounts = offlineCourses.reduce((acc, c) => {
+                    const room = getRoomDisplay(c);
+                    if (room !== '온라인' && room !== '-') {
+                        acc[room] = (acc[room] || 0) + 1;
+                    }
+                    return acc;
+                }, {});
+                let topClassroom = '없음', maxRoomCount = 0;
+                Object.entries(classroomCounts).forEach(([room, count]) => {
+                    if (count > maxRoomCount) {
+                        maxRoomCount = count;
+                        topClassroom = room;
+                    }
+                });
+
+                html += `
+                    <div class="timetable-stats">
+                        <div class="timetable-stat"><div class="stat-icon">📚</div><div class="timetable-stat-number">${offlineCourses.length}</div><div class="timetable-stat-label">총 강의 수</div></div>
+                        <div class="timetable-stat"><div class="stat-icon">⏳</div><div class="timetable-stat-number">${amClasses} / ${pmClasses}</div><div class="timetable-stat-label">오전 / 오후</div></div>
+                        <div class="timetable-stat"><div class="stat-icon">🔥</div><div class="timetable-stat-number">${busiestDay}</div><div class="timetable-stat-label">가장 바쁜 요일</div></div>
+                        <div class="timetable-stat"><div class="stat-icon">📍</div><div class="timetable-stat-number">${topClassroom}</div><div class="timetable-stat-label">주요 강의실</div></div>
+                    </div>
+                `;
+            }
+
+            // 카드형 + 시각적 시간표 동시 표시
+            html += `<div class="card-grid schedule-grid">
+                ${offlineCourses.map(item => `
+                    <div class="card schedule-card">
+                        <div class="card-title">${item.subject}</div>
+                        <div class="card-content">
+                            <div class="schedule-info"><b>교수:</b> ${getProfessorDisplay(item)}</div>
+                            <div class="schedule-info"><b>시간:</b> ${dayNameMap[item.day] || item.day} ${item.start}~${item.end}</div>
+                            <div class="schedule-info"><b>강의실:</b> ${getRoomDisplay(item)}</div>
+                            <div class="schedule-info"><b>이수:</b> ${item.department || '-'} / <b>학점:</b> ${item.credits || '-'}</div>
                         </div>
-                    `).join('')}
-                </div>
-            `;
+                    </div>
+                `).join('')}
+            </div>`;
+            // 시각적 시간표 추가
+            html += `<div id="schedule-visual-timetable"></div>`;
+            resultsContainer.innerHTML = html;
+            // 시간표 렌더링
+            const timetableDiv = document.getElementById('schedule-visual-timetable');
+            if (timetableDiv) {
+                const title = searchType === 'professor' ? `${getProfessorDisplay(offlineCourses[0])} 교수님 시간표` : '검색 결과 시간표';
+                timetableDiv.innerHTML = generateVisualTimetable(offlineCourses, title);
+                applyAllTimetablesScale();
+            }
         } else {
             resultsContainer.innerHTML = getNoResultsMessage('오프라인 강의 결과가 없습니다.');
         }
 
-        // 온라인 강의 결과 표시
         if (onlineCourses.length > 0) {
             onlineCoursesContainer.innerHTML = `
                 <h2 class="section-subtitle">온라인 강의 (${onlineCourses.length}개)</h2>
@@ -496,7 +533,6 @@ function initializeScheduleSection() {
         }
     }
 
-    // 이벤트 리스너 연결
     scheduleType.addEventListener('change', function() {
         searchInputGroup.style.display = 'none';
         professorSelectGroup.style.display = 'none';
@@ -511,19 +547,16 @@ function initializeScheduleSection() {
                 classroomSelectGroup.style.display = 'block';
                 break;
             case 'missing-professor':
-                // 이 옵션은 입력 필드가 필요 없음
                 break;
             default:
                 searchInputGroup.style.display = 'block';
                 break;
         }
-        // 유형 변경 시 이전 결과 초기화
         resultsContainer.innerHTML = '';
         onlineCoursesContainer.innerHTML = '';
     });
 
     searchButton.addEventListener('click', performScheduleSearch);
-    // Enter 키로도 검색 가능하게
     searchInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') performScheduleSearch();
     });
@@ -734,9 +767,6 @@ function initializeSection(sectionId) {
         case 'heatmap':
             initializeHeatmapFeatures();
             renderHeatmapChart();
-            break;
-        case 'professor-timetable':
-            initializeProfessorSection();
             break;
     }
 }
@@ -1013,116 +1043,6 @@ function initializeSearchSection() {
     }
 }
 
-function initializeProfessorSection() {
-    const select = document.getElementById('professor-main-select');
-    const resultsDiv = document.getElementById('professor-main-results');
-    if (!select || !resultsDiv) return;
-
-    select.onchange = function() {
-        const name = select.value;
-        if (!name) {
-            resultsDiv.innerHTML = '';
-            return;
-        }
-
-    const classes = timetableData.filter(item => (item.professor || '').includes(name));
-        if (classes.length === 0) {
-            resultsDiv.innerHTML = '<div class="card"><div class="card-content">해당 교수님의 강의 정보가 없습니다.</div></div>';
-            return;
-        }
-
-        // 교수님 통계 계산
-        const totalCredits = classes.reduce((sum, c) => sum + (c.credit || 0), 0);
-        const teachingDays = [...new Set(classes.map(c => c.day))].filter(d => d !== 'ONLINE');
-        const mainBuilding = [...new Set(classes.map(c => c.building_name))].filter(b => b).join(', ');
-
-        // --- 추가 통계 계산 ---
-        // 오전/오후 강의 비율
-        const amClasses = classes.filter(c => c.start < '12:00' && c.day !== 'ONLINE').length;
-        const pmClasses = classes.filter(c => c.start >= '12:00' && c.day !== 'ONLINE').length;
-
-        // 가장 바쁜 요일
-        const dayCounts = classes.reduce((acc, c) => {
-            if (c.day !== 'ONLINE') {
-                acc[c.day] = (acc[c.day] || 0) + 1;
-            }
-            return acc;
-        }, {});
-        let busiestDay = '없음';
-        let maxCount = 0;
-        Object.entries(dayCounts).forEach(([day, count]) => {
-            if (count > maxCount) {
-                maxCount = count;
-                busiestDay = `${dayNameMap[day]}요일 (${count}개)`;
-            }
-        });
-
-        // 주요 강의실
-        const classroomCounts = classes.reduce((acc, c) => {
-            const room = getRoomDisplay(c);
-            if (room !== '온라인' && room !== '-') {
-                acc[room] = (acc[room] || 0) + 1;
-            }
-            return acc;
-        }, {});
-        let topClassroom = '없음';
-        let maxRoomCount = 0;
-        for (const room in classroomCounts) {
-            if (classroomCounts[room] > maxRoomCount) {
-                maxRoomCount = classroomCounts[room];
-                topClassroom = room;
-            }
-        }
-
-        // 통계 및 시간표 템플릿
-        resultsDiv.innerHTML = `
-            <div class="timetable-stats" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
-                <div class="timetable-stat">
-                    <div class="stat-icon">📚</div>
-                    <div class="timetable-stat-number">${classes.length}</div>
-                    <div class="timetable-stat-label">총 강의 수</div>
-                </div>
-                <div class="timetable-stat">
-                    <div class="stat-icon">⏳</div>
-                    <div class="timetable-stat-number">${amClasses} / ${pmClasses}</div>
-                    <div class="timetable-stat-label">오전 / 오후</div>
-                </div>
-                <div class="timetable-stat">
-                    <div class="stat-icon">🔥</div>
-                    <div class="timetable-stat-number">${busiestDay}</div>
-                    <div class="timetable-stat-label">가장 바쁜 요일</div>
-                </div>
-                <div class="timetable-stat">
-                    <div class="stat-icon">📍</div>
-                    <div class="timetable-stat-number">${topClassroom}</div>
-                    <div class="timetable-stat-label">주요 강의실</div>
-                </div>
-                <div class="timetable-stat">
-                    <div class="stat-icon">🗓️</div>
-                    <div class="timetable-stat-number">${teachingDays.length}일</div>
-                    <div class="timetable-stat-label">강의하는 날</div>
-                </div>
-                <div class="timetable-stat">
-                    <div class="stat-icon">🏢</div>
-                    <div class="timetable-stat-number">${mainBuilding || '없음'}</div>
-                    <div class="timetable-stat-label">활동 건물</div>
-                </div>
-            </div>
-            <div id="professor-visual-timetable"></div>
-        `;
-
-        // 시각적 시간표 생성 및 삽입
-        const timetableContainer = document.getElementById('professor-visual-timetable');
-        // generateVisualTimetable 함수가 이미 있다고 가정하고 호출
-        // 이 함수는 script.js의 다른 부분에 정의되어 있어야 합니다.
-        const visualTimetableHTML = generateVisualTimetable(classes, `${name} 교수님 시간표`);
-        timetableContainer.innerHTML = visualTimetableHTML;
-        
-        // 생성된 시간표에 자동 스케일링 적용
-        applyAllTimetablesScale();
-    };
-}
-
 function estimateConsultationTimes(professorName, day) {
     const classes = timetableData
         .filter(item => (item.professor || '').includes(professorName) && item.day === day)
@@ -1162,18 +1082,26 @@ function renderHeatmapChart() {
     const selectedBuilding = buildingSelect ? buildingSelect.value : '';
     const deptSelect = document.getElementById('heatmap-dept-select');
     const selectedDept = deptSelect ? deptSelect.value : '';
+    const chartTitleEl = document.getElementById('heatmap-chart-title');
 
     const days = ['월', '화', '수', '목', '금', '토'];
     const timeLabels = ['09', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
     const data = [];
 
     let filteredData = timetableData;
-    if (selectedBuilding) {
+    let title = "전체 캠퍼스 혼잡도";
+    if (selectedBuilding && selectedDept) {
+        filteredData = filteredData.filter(item => item.building_name === selectedBuilding && item.department === selectedDept);
+        title = `${selectedBuilding} - ${selectedDept} 수업 혼잡도`;
+    } else if (selectedBuilding) {
         filteredData = filteredData.filter(item => item.building_name === selectedBuilding);
-    }
-    if (selectedDept) {
+        title = `${selectedBuilding} 혼잡도`;
+    } else if (selectedDept) {
         filteredData = filteredData.filter(item => item.department === selectedDept);
+        title = `${selectedDept} 수업 혼잡도`;
     }
+    
+    if(chartTitleEl) chartTitleEl.textContent = title;
 
     timeLabels.forEach((time, tIndex) => {
         days.forEach((day, dIndex) => {

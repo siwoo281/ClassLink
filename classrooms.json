@@ -197,7 +197,7 @@
   },
   {
     "building": "21세기관",
-    "room": "P517-2"
+    "room": "P517"
   },
   {
     "building": "21세기관",
@@ -217,7 +217,7 @@
   },
   {
     "building": "505",
-    "room": "505-1"
+    "room": "505"
   },
   {
     "building": "AU",
@@ -237,11 +237,11 @@
   },
   {
     "building": "SMART배재관",
-    "room": "SP401-1"
+    "room": "SP401"
   },
   {
     "building": "SMART배재관",
-    "room": "SP501-1"
+    "room": "SP501"
   },
   {
     "building": "SMART배재관",
@@ -305,15 +305,15 @@
   },
   {
     "building": "국제교류관",
-    "room": "G301-2"
+    "room": "G301"
   },
   {
     "building": "국제교류관",
-    "room": "G301-3"
+    "room": "G301"
   },
   {
     "building": "국제교류관",
-    "room": "G301-5"
+    "room": "G301"
   },
   {
     "building": "국제교류관",
@@ -477,7 +477,7 @@
   },
   {
     "building": "미래창조관",
-    "room": "MC608-1"
+    "room": "MC608"
   },
   {
     "building": "미래창조관",
@@ -537,7 +537,7 @@
   },
   {
     "building": "소월관",
-    "room": "S205-1"
+    "room": "S205"
   },
   {
     "building": "소월관",
@@ -621,7 +621,7 @@
   },
   {
     "building": "아펜젤러관",
-    "room": "A516-1"
+    "room": "A516"
   },
   {
     "building": "아펜젤러관",
@@ -689,11 +689,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y110-1"
+    "room": "Y110"
   },
   {
     "building": "예술관",
-    "room": "Y110-2"
+    "room": "Y110"
   },
   {
     "building": "예술관",
@@ -706,66 +706,6 @@
   {
     "building": "예술관",
     "room": "Y209"
-  },
-  {
-    "building": "예술관",
-    "room": "Y301"
-  },
-  {
-    "building": "예술관",
-    "room": "Y302"
-  },
-  {
-    "building": "예술관",
-    "room": "Y303"
-  },
-  {
-    "building": "예술관",
-    "room": "Y304"
-  },
-  {
-    "building": "예술관",
-    "room": "Y305"
-  },
-  {
-    "building": "예술관",
-    "room": "Y306"
-  },
-  {
-    "building": "예술관",
-    "room": "Y307"
-  },
-  {
-    "building": "예술관",
-    "room": "Y308"
-  },
-  {
-    "building": "예술관",
-    "room": "Y309"
-  },
-  {
-    "building": "예술관",
-    "room": "Y310"
-  },
-  {
-    "building": "예술관",
-    "room": "Y311"
-  },
-  {
-    "building": "예술관",
-    "room": "Y312"
-  },
-  {
-    "building": "예술관",
-    "room": "Y313"
-  },
-  {
-    "building": "예술관",
-    "room": "Y314"
-  },
-  {
-    "building": "예술관",
-    "room": "Y315"
   },
   {
     "building": "예술관",
@@ -801,11 +741,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y417-1"
+    "room": "Y417"
   },
   {
     "building": "예술관",
-    "room": "Y417-2"
+    "room": "Y417"
   },
   {
     "building": "예술관",
@@ -813,11 +753,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y424-1"
+    "room": "Y424"
   },
   {
     "building": "예술관",
-    "room": "Y424-2"
+    "room": "Y424"
   },
   {
     "building": "예술관",
@@ -825,27 +765,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y425-1"
+    "room": "Y425"
   },
   {
     "building": "예술관",
-    "room": "Y425-2"
-  },
-  {
-    "building": "예술관",
-    "room": "Y501"
-  },
-  {
-    "building": "예술관",
-    "room": "Y502"
-  },
-  {
-    "building": "예술관",
-    "room": "Y504"
-  },
-  {
-    "building": "예술관",
-    "room": "Y505"
+    "room": "Y425"
   },
   {
     "building": "예술관",
@@ -861,22 +785,6 @@
   },
   {
     "building": "예술관",
-    "room": "Y513"
-  },
-  {
-    "building": "예술관",
-    "room": "Y514"
-  },
-  {
-    "building": "예술관",
-    "room": "Y515"
-  },
-  {
-    "building": "예술관",
-    "room": "Y516"
-  },
-  {
-    "building": "예술관",
     "room": "Y521"
   },
   {
@@ -885,7 +793,7 @@
   },
   {
     "building": "예술관",
-    "room": "Y522-1"
+    "room": "Y522"
   },
   {
     "building": "예술관",
@@ -901,11 +809,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y535-1"
+    "room": "Y535"
   },
   {
     "building": "예술관",
-    "room": "Y535-2"
+    "room": "Y535"
   },
   {
     "building": "예술관",
@@ -913,11 +821,11 @@
   },
   {
     "building": "예술관",
-    "room": "Y537-1"
+    "room": "Y537"
   },
   {
     "building": "예술관",
-    "room": "Y537-2"
+    "room": "Y537"
   },
   {
     "building": "예술관",
@@ -929,11 +837,11 @@
   },
   {
     "building": "우남관",
-    "room": "W105-2"
+    "room": "W105"
   },
   {
     "building": "우남관",
-    "room": "W105-3"
+    "room": "W105"
   },
   {
     "building": "우남관",
@@ -1053,7 +961,7 @@
   },
   {
     "building": "자연과학관",
-    "room": "J116-1"
+    "room": "J116"
   },
   {
     "building": "자연과학관",
@@ -1093,7 +1001,7 @@
   },
   {
     "building": "자연과학관",
-    "room": "J215-1"
+    "room": "J215"
   },
   {
     "building": "자연과학관",
