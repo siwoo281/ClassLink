@@ -373,17 +373,135 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function initializeScheduleSection() {
     const scheduleType = document.getElementById('schedule-type');
-    const searchInputGroup = document.getElementById('search-input-group');
-    const professorSelectGroup = document.getElementById('professor-select-group');
-    const classroomSelectGroup = document.getElementById('schedule-classroom-select-group');
+    const searchInput = document.getElementById('schedule-query');
+    const professorSelect = document.getElementById('professor-select');
+    const classroomSelect = document.getElementById('schedule-classroom-select');
+    const dayFilter = document.getElementById('schedule-day-filter');
     const searchButton = document.getElementById('schedule-search-button');
     const resultsContainer = document.getElementById('schedule-results');
     const onlineCoursesContainer = document.getElementById('online-courses-list');
+    
+    const searchInputGroup = document.getElementById('search-input-group');
+    const professorSelectGroup = document.getElementById('professor-select-group');
+    const classroomSelectGroup = document.getElementById('schedule-classroom-select-group');
 
+    function performScheduleSearch() {
+        const type = scheduleType.value;
+        const day = dayFilter.value;
+        let query = '';
+
+        // 1. 검색 유형에 따라 검색어(query) 설정
+        switch (type) {
+            case 'professor':
+                query = professorSelect.value;
+                break;
+            case 'classroom':
+                query = classroomSelect.value;
+                break;
+            case 'missing-professor':
+                query = '미지정'; // 교수명이 비어있는 경우를 찾기 위함
+                break;
+            default:
+                query = searchInput.value.trim().toLowerCase();
+                break;
+        }
+
+        if (type !== 'missing-professor' && !query) {
+            resultsContainer.innerHTML = getNoResultsMessage('검색어를 입력하거나 선택해주세요.');
+            onlineCoursesContainer.innerHTML = '';
+            return;
+        }
+
+        // 2. 데이터 필터링
+        let filteredResults = timetableData.filter(item => {
+            // 요일 필터
+            if (day && item.day !== day) {
+                return false;
+            }
+
+            // 검색 유형별 필터
+            switch (type) {
+                case 'subject':
+                    return (item.subject || '').toLowerCase().includes(query);
+                case 'professor':
+                    return (item.professor || '') === query;
+                case 'department':
+                    return (item.department || '').toLowerCase().includes(query);
+                case 'classroom':
+                    const [building, room] = query.split('-');
+                    return item.building_name === building && item.classroom === room;
+                case 'missing-professor':
+                    return !item.professor || item.professor === '미지정';
+                default:
+                    return false;
+            }
+        });
+
+        // 3. 결과 렌더링
+        renderScheduleResults(filteredResults);
+    }
+
+    function renderScheduleResults(results) {
+        const onlineCourses = results.filter(item => item.day === 'ONLINE');
+        const offlineCourses = results.filter(item => item.day !== 'ONLINE');
+
+        // 오프라인 강의 결과 표시
+        if (offlineCourses.length > 0) {
+            // 결과를 요일 순, 시작 시간 순으로 정렬
+            const dayOrder = { 'MON': 1, 'TUE': 2, 'WED': 3, 'THU': 4, 'FRI': 5, 'SAT': 6 };
+            offlineCourses.sort((a, b) => {
+                const dayCompare = (dayOrder[a.day] || 99) - (dayOrder[b.day] || 99);
+                if (dayCompare !== 0) return dayCompare;
+                return (a.start || '').localeCompare(b.start || '');
+            });
+
+            resultsContainer.innerHTML = `
+                <div class="results-summary">총 ${offlineCourses.length}개의 오프라인 강의가 검색되었습니다.</div>
+                <div class="card-grid schedule-grid">
+                    ${offlineCourses.map(item => `
+                        <div class="card schedule-card">
+                            <div class="card-title">${item.subject}</div>
+                            <div class="card-content">
+                                <div class="schedule-info"><b>교수:</b> ${getProfessorDisplay(item)}</div>
+                                <div class="schedule-info"><b>시간:</b> ${dayNameMap[item.day] || item.day} ${item.start}~${item.end}</div>
+                                <div class="schedule-info"><b>강의실:</b> ${getRoomDisplay(item)}</div>
+                                <div class="schedule-info"><b>이수:</b> ${item.department || '-'} / <b>학점:</b> ${item.credits || '-'}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            resultsContainer.innerHTML = getNoResultsMessage('오프라인 강의 결과가 없습니다.');
+        }
+
+        // 온라인 강의 결과 표시
+        if (onlineCourses.length > 0) {
+            onlineCoursesContainer.innerHTML = `
+                <h2 class="section-subtitle">온라인 강의 (${onlineCourses.length}개)</h2>
+                <div class="card-grid schedule-grid">
+                    ${onlineCourses.map(item => `
+                        <div class="card schedule-card online">
+                            <div class="card-title">${item.subject}</div>
+                            <div class="card-content">
+                                <div class="schedule-info"><b>교수:</b> ${getProfessorDisplay(item)}</div>
+                                <div class="schedule-info"><b>이수:</b> ${item.department || '-'} / <b>학점:</b> ${item.credits || '-'}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            onlineCoursesContainer.innerHTML = '';
+        }
+    }
+
+    // 이벤트 리스너 연결
     scheduleType.addEventListener('change', function() {
         searchInputGroup.style.display = 'none';
         professorSelectGroup.style.display = 'none';
         classroomSelectGroup.style.display = 'none';
+        searchInput.value = '';
 
         switch (this.value) {
             case 'professor':
@@ -392,14 +510,55 @@ function initializeScheduleSection() {
             case 'classroom':
                 classroomSelectGroup.style.display = 'block';
                 break;
+            case 'missing-professor':
+                // 이 옵션은 입력 필드가 필요 없음
+                break;
             default:
                 searchInputGroup.style.display = 'block';
                 break;
         }
+        // 유형 변경 시 이전 결과 초기화
+        resultsContainer.innerHTML = '';
+        onlineCoursesContainer.innerHTML = '';
     });
 
-    searchButton.addEventListener('click', function() {
-        // 검색 로직 구현
+    searchButton.addEventListener('click', performScheduleSearch);
+    // Enter 키로도 검색 가능하게
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') performScheduleSearch();
+    });
+}
+
+function initializeRouletteSection() {
+    const rouletteButton = document.getElementById('roulette-button');
+    const rouletteResult = document.getElementById('roulette-result');
+    
+    const menuOptions = [
+        "뼈해장국", "돈까스", "제육볶음", "서브웨이", "짜장면", "햄버거",
+        "순대국밥", "김치찌개", "초밥", "파스타", "쌀국수", "마라탕", "부대찌개"
+    ];
+
+    rouletteButton.addEventListener('click', () => {
+        rouletteResult.innerHTML = `
+            <div class="roulette-thinking">
+                <div class="spinner"></div>
+                <p>메뉴를 고르는 중...</p>
+            </div>
+        `;
+        rouletteButton.disabled = true;
+
+        setTimeout(() => {
+            const randomIndex = Math.floor(Math.random() * menuOptions.length);
+            const selectedMenu = menuOptions[randomIndex];
+            
+            rouletteResult.innerHTML = `
+                <div class="roulette-final-result">
+                    <p>오늘의 추천 메뉴는?</p>
+                    <h2 class="selected-menu">${selectedMenu}!</h2>
+                </div>
+            `;
+            rouletteButton.disabled = false;
+        }, 1500); // 1.5초 후 결과 표시
     });
 }
 
