@@ -127,7 +127,10 @@
                                 <option value="">전체 강의실</option>
                             </select>
                         </div>
-                        <button class="btn" id="search-button">검색</button>
+                        <div class="search-buttons">
+                            <button class="btn" id="search-now-button">📍 지금 바로 검색</button>
+                            <button class="btn" id="search-button">조건 검색</button>
+                        </div>
                     </div>
                 </div>
                 <div id="search-results"></div>
@@ -156,7 +159,7 @@
         </main>
     </div>
 
-        <script src="script.js?v=1672531200000"></script>
+        <script src="script.js?v=2"></script>
     <script>
         // Cache-busting: Append current timestamp to script src
         const scriptTag = document.querySelector('script[src^="script.js"]');
