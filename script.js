@@ -1,218 +1,10 @@
 // ===== 건물별 특성(주요 학과, 대표 수업) 추출 및 표시 =====
 
-// ===== 현재 시간 기준 TOP3 붐비는/한산한 건물 표시 =====
-// 혼잡도 랭킹 카드 렌더링
-function renderBuildingCongestionRanking() {
-    const now = new Date();
-    const { congestion } = calculateBuildingStatsForTime(now);
-    const sorted = congestion.sort((a, b) => b[1] - a[1]);
-    
-    // 실시간 기준 시각 업데이트
-    const timestampEl = document.getElementById('ranking-timestamp');
-    if (timestampEl) {
-        timestampEl.textContent = `(${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} 기준)`;
-    }
-
-    const top = sorted.slice(0, 3);
-    const bottom = sorted.length > 3 ? sorted.slice(-3).reverse() : [];
-    const rankingDiv = document.getElementById('building-congestion-ranking');
-    if (!rankingDiv) return;
-
-    if (sorted.length === 0) {
-        rankingDiv.innerHTML = '<div class="example-notice">현재 시간에 진행 중인 수업이 없습니다.<br>예시: <b>평일 10:00</b>에 확인해보세요!</div>';
-        return;
-    }
-
-    rankingDiv.innerHTML = `
-        <div class="congestion-ranking-wrap">
-            <div class="ranking-block">
-                <div class="ranking-title">🔥 혼잡 TOP 3</div>
-                ${top.map(([building, count], i) => {
-                    const level = getCongestionLevel(count);
-                    return `<div class="congestion-card" data-building="${building}" style="border-left-color:${level.color};">
-                        <span class="rank-badge" style="background-color:${level.color};">${i + 1}</span>
-                        <span class="building-name">${building}</span>
-                        <span class="student-count">${count}명</span>
-                        <span class="congestion-badge" style="color:${level.color};">${level.emoji} ${level.level}</span>
-                    </div>`;
-                }).join('')}
-            </div>
-            ${bottom.length > 0 ? `
-            <div class="ranking-block">
-                <div class="ranking-title">🟢 여유 TOP 3</div>
-                ${bottom.map(([building, count], i) => {
-                    const level = getCongestionLevel(count);
-                    const rank = sorted.length - bottom.length + i + 1;
-                    return `<div class="congestion-card" data-building="${building}" style="border-left-color:${level.color};">
-                        <span class="rank-badge" style="background-color:${level.color};">${rank}</span>
-                        <span class="building-name">${building}</span>
-                        <span class="student-count">${count}명</span>
-                        <span class="congestion-badge" style="color:${level.color};">${level.emoji} ${level.level}</span>
-                    </div>`;
-                }).join('')}
-            </div>
-            ` : ''}
-        </div>
-    `;
-}
-
 // 건물별 특성 정보 렌더링
-function renderBuildingFeatureInfo(buildingName) {
-    const now = new Date();
-    const { features } = calculateBuildingStatsForTime(now);
-    const infoDiv = document.getElementById('building-feature-info');
-    if (!infoDiv) return;
-    if (!features[buildingName]) {
-        infoDiv.innerHTML = '<div class="example-notice">이 시간에 해당 건물에서 진행 중인 수업이 없습니다.</div>';
-        return;
-    }
-    const deptEntries = Object.entries(features[buildingName].dept).sort((a, b) => b[1] - a[1]);
-    const subjectEntries = Object.entries(features[buildingName].subject).sort((a, b) => b[1] - a[1]);
-    infoDiv.innerHTML = `
-        <div class="feature-info-wrap">
-            <div class="feature-card">
-                <div class="feature-title">주요 개설 학과</div>
-                <div class="feature-list">${deptEntries.length ? deptEntries.map(([d, n]) => `<span>${d} (${n})</span>`).join(', ') : '-'}</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-title">주요 개설 과목</div>
-                <div class="feature-list">${subjectEntries.length ? subjectEntries.slice(0, 5).map(([s, n]) => `<span>${s} (${n})</span>`).join(', ') : '-'}</div>
-            </div>
-        </div>
-    `;
-}
-
 // 피크타임 정보 렌더링
-function renderPeakTimeInfo() {
-    const infoDiv = document.getElementById('heatmap-info-summary');
-    if (!infoDiv) return;
-    // 시간대별 전체 학생 수 집계
-    const timeBuckets = {};
-    timetableData.forEach(item => {
-        if (!item.start || !item.end || !item.day || !item.student_count) return;
-        const startHour = parseInt(item.start.split(':')[0]);
-        const endHour = parseInt(item.end.split(':')[0]);
-        for (let h = startHour; h < endHour; h++) {
-            const key = `${item.day}_${h}`;
-            timeBuckets[key] = (timeBuckets[key] || 0) + item.student_count;
-        }
-    });
-    // 피크타임 찾기
-    let peakKey = null, peakValue = 0;
-    Object.entries(timeBuckets).forEach(([k, v]) => {
-        if (v > peakValue) {
-            peakValue = v;
-            peakKey = k;
-        }
-    });
-    if (!peakKey) {
-        infoDiv.innerHTML = '<div class="peak-time-info">피크타임 정보 없음</div>';
-        return;
-    }
-    const [peakDay, peakHour] = peakKey.split('_');
-    const dayKor = dayNameMap[peakDay] || peakDay;
-    infoDiv.innerHTML = `<div class="peak-time-info">가장 붐비는 시간: <b>${dayKor}요일 ${peakHour}:00</b> (${peakValue}명)</div>`;
-}
-
 // 혼잡도, 특성, 피크타임 등 heatmap 섹션 초기화
-function initializeHeatmapFeatures() {
-    renderBuildingCongestionRanking();
-    renderPeakTimeInfo();
-
-    const rankingDiv = document.getElementById('building-congestion-ranking');
-    if (rankingDiv) {
-        rankingDiv.onclick = function(e) {
-            const card = e.target.closest('.congestion-card');
-            if (card) {
-                const building = card.dataset.building;
-                
-                // 모든 카드에서 'selected' 클래스 제거
-                rankingDiv.querySelectorAll('.congestion-card').forEach(c => c.classList.remove('selected'));
-                // 클릭된 카드에 'selected' 클래스 추가
-                card.classList.add('selected');
-
-                // 건물별 특성 정보 렌더링
-                renderBuildingFeatureInfo(building);
-
-                // 히트맵 건물 필터 업데이트 및 차트 다시 그리기
-                const buildingSelect = document.getElementById('heatmap-building-select');
-                if (buildingSelect) {
-                    buildingSelect.value = building;
-                    renderHeatmapChart();
-                }
-            }
-        };
-    }
-
-    const deptSelect = document.getElementById('heatmap-dept-select');
-    if (deptSelect) {
-        deptSelect.onchange = renderHeatmapChart;
-    }
-    
-    const buildingSelect = document.getElementById('heatmap-building-select');
-    if(buildingSelect) {
-        buildingSelect.onchange = () => {
-            // 필터 변경 시, 랭킹 카드 선택 상태 초기화
-            if (rankingDiv) {
-                 rankingDiv.querySelectorAll('.congestion-card').forEach(c => c.classList.remove('selected'));
-            }
-            document.getElementById('building-feature-info').innerHTML = '<div class="example-notice">랭킹 카드를 클릭하여 건물별 특성을 확인하세요.</div>';
-            renderHeatmapChart();
-        };
-    }
-}
-
 // 혼잡도 등급 산정 및 매핑 함수
-function getCongestionLevel(studentCount) {
-    if (studentCount <= 50) {
-        return { level: '여유', emoji: '🟢', color: '#38a169', desc: '여유' };
-    } else if (studentCount <= 150) {
-        return { level: '보통', emoji: '🟡', color: '#ecc94b', desc: '보통' };
-    } else if (studentCount <= 300) {
-        return { level: '혼잡', emoji: '🟠', color: '#ed8936', desc: '혼잡' };
-    } else {
-        return { level: '매우 혼잡', emoji: '🔴', color: '#e53e3e', desc: '매우 혼잡' };
-    }
-}
-
 // 시간별 건물 혼잡도 및 특성 계산
-function calculateBuildingStatsForTime(targetDate) {
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    const currentDay = dayNames[targetDate.getDay()];
-    const currentTimeInMinutes = timeStringToMinutes(targetDate.getHours().toString().padStart(2, '0') + ':' + targetDate.getMinutes().toString().padStart(2, '0'));
-
-    const buildingStats = {}; // 혼잡도 계산용
-    const buildingInfo = {};  // 특성 정보 계산용
-
-    timetableData.forEach(item => {
-        if (item.day !== currentDay || !item.start || !item.end || !item.building_name) return;
-        const startMinutes = timeStringToMinutes(item.start);
-        const endMinutes = timeStringToMinutes(item.end);
-
-        if (currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes) {
-            // 혼잡도 계산
-            if (!buildingStats[item.building_name]) buildingStats[item.building_name] = 0;
-            buildingStats[item.building_name] += (item.student_count || 0);
-
-            // 특성 정보 계산
-            if (!buildingInfo[item.building_name]) {
-                buildingInfo[item.building_name] = { dept: {}, subject: {} };
-            }
-            if (item.department) {
-                buildingInfo[item.building_name].dept[item.department] = (buildingInfo[item.building_name].dept[item.department] || 0) + 1;
-            }
-            if (item.subject) {
-                buildingInfo[item.building_name].subject[item.subject] = (buildingInfo[item.building_name].subject[item.subject] || 0) + 1;
-            }
-        }
-    });
-
-    return {
-        congestion: Object.entries(buildingStats),
-        features: buildingInfo
-    };
-}
-
 // ===== 데이터 정의 =====
 let timetableData = [];
 let professorsList = [];
@@ -265,18 +57,6 @@ function processLoadedData() {
     populateDropdown('classroom-select', classroomsList, { placeholder: '전체 강의실', isClassroom: true });
     populateDropdown('schedule-classroom-select', classroomsList, { placeholder: '강의실을 선택하세요', isClassroom: true });
 
-    // Heatmap 필터 채우기
-    const buildingSelect = document.getElementById('heatmap-building-select');
-    if (buildingSelect) {
-        const buildings = [...new Set(classroomsList.map(c => c.building))].sort();
-        buildingSelect.innerHTML += buildings.map(b => `<option value="${b}">${b}</option>`).join('');
-    }
-    const deptSelect = document.getElementById('heatmap-dept-select');
-    if (deptSelect) {
-        const departments = [...new Set(timetableData.map(item => item.department).filter(Boolean))].sort();
-        deptSelect.innerHTML += departments.map(d => `<option value="${d}">${d}</option>`).join('');
-    }
-
     console.log(`데이터 처리 완료: ${timetableData.length}개 강의, ${professorsList.length}명 교수, ${classroomsList.length}개 강의실`);
     
     const activeNavLink = document.querySelector('.nav-link.active');
@@ -307,10 +87,6 @@ function handleDataLoadError() {
 
 document.addEventListener('DOMContentLoaded', async function() {
     await loadTimetableData();
-    // heatmap 섹션이 보이면 강제 렌더링
-    if (document.getElementById('heatmap') && !document.getElementById('heatmap').classList.contains('section-hidden')) {
-        renderHeatmapChart();
-    }
 
     const navLinks = document.querySelectorAll('[data-target]');
     const sections = document.querySelectorAll('section');
@@ -764,10 +540,6 @@ function initializeSection(sectionId) {
             updateRealTimeStatus();
             realTimeIntervalId = setInterval(updateRealTimeStatus, 60000); // 1분마다 새로고침
             break;
-        case 'heatmap':
-            initializeHeatmapFeatures();
-            renderHeatmapChart();
-            break;
     }
 }
 
@@ -1064,107 +836,6 @@ function estimateConsultationTimes(professorName, day) {
     }
 
     return freeSlots;
-}
-
-// 히트맵 차트 렌더링 (기존 함수 확장)
-function renderHeatmapChart() {
-    const ctx = document.getElementById('heatmap-chart');
-    if (!ctx) return;
-    if (window.myHeatmapChart) {
-        window.myHeatmapChart.destroy();
-    }
-    // 혼잡도 랭킹 카드 표시
-    if (document.getElementById('building-congestion-ranking')) {
-        renderBuildingCongestionRanking();
-    }
-
-    const buildingSelect = document.getElementById('heatmap-building-select');
-    const selectedBuilding = buildingSelect ? buildingSelect.value : '';
-    const deptSelect = document.getElementById('heatmap-dept-select');
-    const selectedDept = deptSelect ? deptSelect.value : '';
-    const chartTitleEl = document.getElementById('heatmap-chart-title');
-
-    const days = ['월', '화', '수', '목', '금', '토'];
-    const timeLabels = ['09', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
-    const data = [];
-
-    let filteredData = timetableData;
-    let title = "전체 캠퍼스 혼잡도";
-    if (selectedBuilding && selectedDept) {
-        filteredData = filteredData.filter(item => item.building_name === selectedBuilding && item.department === selectedDept);
-        title = `${selectedBuilding} - ${selectedDept} 수업 혼잡도`;
-    } else if (selectedBuilding) {
-        filteredData = filteredData.filter(item => item.building_name === selectedBuilding);
-        title = `${selectedBuilding} 혼잡도`;
-    } else if (selectedDept) {
-        filteredData = filteredData.filter(item => item.department === selectedDept);
-        title = `${selectedDept} 수업 혼잡도`;
-    }
-    
-    if(chartTitleEl) chartTitleEl.textContent = title;
-
-    timeLabels.forEach((time, tIndex) => {
-        days.forEach((day, dIndex) => {
-            const dayKey = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][dIndex];
-            const totalStudents = filteredData
-                .filter(item => {
-                    if (!item.start || !item.end) return false;
-                    const itemStartTime = parseInt(item.start.split(':')[0]);
-                    const itemEndTime = parseInt(item.end.split(':')[0]);
-                    return item.day === dayKey &&
-                           itemStartTime <= parseInt(time) &&
-                           parseInt(time) < itemEndTime;
-                })
-                .reduce((sum, item) => sum + (item.student_count || 0), 0);
-            data.push({
-                x: time + '시',
-                y: day,
-                v: totalStudents
-            });
-        });
-    });
-
-    window.myHeatmapChart = new Chart(ctx.getContext('2d'), {
-        type: 'matrix',
-        data: {
-            datasets: [{
-                label: '총 수강 인원',
-                data: data,
-                backgroundColor(ctx) {
-                    const value = ctx.dataset.data[ctx.dataIndex].v;
-                    if (value === 0) return 'rgba(245, 245, 245, 0.8)';
-                    // Adjust alpha based on student count. Max alpha at ~300 students.
-                    const alpha = Math.min(0.2 + (value / 300), 1); 
-                    return `rgba(102, 126, 234, ${alpha})`;
-                },
-                borderColor(ctx) {
-                    const value = ctx.dataset.data[ctx.dataIndex].v;
-                    if (value === 0) return 'rgba(200,200,200,0.5)';
-                    return 'rgba(102, 126, 234, 0.7)';
-                },
-                borderWidth: 1,
-                width: ({chart}) => (chart.chartArea || {}).width / timeLabels.length - 2,
-                height: ({chart}) => (chart.chartArea || {}).height / days.length - 2,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.raw.y} ${context.raw.x}: ${context.raw.v}명`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { type: 'category', title: { display: true, text: '시간' } },
-                y: { type: 'category', title: { display: true, text: '요일' } }
-            }
-        }
-    });
 }
 
 // (This is a simplified representation)
