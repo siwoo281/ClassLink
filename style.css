@@ -90,10 +90,18 @@
 
         .section-title {
             font-size: 2rem;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             color: #333;
             text-align: center;
             font-weight: 700;
+        }
+
+        .section-description {
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
         }
 
         /* Dashboard (Quick Access) */
@@ -210,9 +218,15 @@
         /* Time Buttons */
         .time-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
             margin: 20px 0;
+        }
+
+        @media (min-width: 768px) {
+            .time-buttons {
+                grid-template-columns: repeat(7, 1fr);
+            }
         }
 
         .time-btn {
@@ -411,20 +425,6 @@
             margin-bottom: 10px;
         }
 
-        /* Chart Container */
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            margin-top: 30px;
-            min-height: 400px; /* 모바일 가로 차트에 충분한 높이 확보 */
-        }
-
-        #heatmap-chart {
-            max-height: 400px; /* 모바일에서 스크롤 방지 */
-        }
-
         /* Roulette Result */
         .roulette-result {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
@@ -444,6 +444,50 @@
         .roulette-result p {
             font-size: 1.2rem;
             opacity: 0.9;
+        }
+
+        .roulette-thinking {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 40px;
+        }
+
+        .roulette-thinking p {
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .roulette-final-result {
+            text-align: center;
+        }
+
+        .roulette-final-result p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .selected-menu {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .roulette-intro {
+            text-align: center;
+        }
+
+        .roulette-description {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #666;
         }
 
         /* Search Container */
@@ -485,6 +529,20 @@
 
         .search-info p {
             margin: 5px 0;
+        }
+
+        /* Search Buttons */
+        .search-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .search-buttons {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* 교수님 시간표 스타일 */
@@ -746,161 +804,11 @@
     margin-bottom: 15px;
 }
 
-/* ===== 혼잡도 페이지 개선 스타일 ===== */
-.section-subtitle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.section-subtitle h2 {
-    margin: 0;
-}
-
-.timestamp {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #666;
-}
-
-.congestion-ranking-wrap {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-.ranking-block {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.ranking-title {
-    font-weight: 700;
-    margin-bottom: 5px;
-    font-size: 1.2rem;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.congestion-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    padding: 12px 15px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-rows: auto auto;
-    align-items: center;
-    gap: 0 15px;
-    border-left: 5px solid transparent;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-}
-
-.congestion-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-.congestion-card.selected {
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
-    border-color: #667eea;
-}
-
-.rank-badge {
-    grid-row: 1 / -1;
-    font-size: 1rem;
-    font-weight: 700;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.building-name {
-    grid-column: 2;
-    font-weight: 600;
+.no-results p {
     font-size: 1.1rem;
-}
-
-.student-count {
-    grid-column: 3;
-    grid-row: 1;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #333;
-    justify-self: end;
-}
-
-.congestion-badge {
-    grid-column: 2;
-    grid-row: 2;
-    font-size: 0.9rem;
+    color: #6c757d;
     font-weight: 500;
 }
-
-.feature-info-wrap {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    background: #f8f9ff;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-.feature-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    padding: 15px;
-}
-
-.feature-title {
-    font-weight: 600;
-    color: #4a5568;
-    margin-bottom: 10px;
-}
-
-.feature-list {
-    font-size: 0.9rem;
-    color: #718096;
-    line-height: 1.6;
-}
-
-.feature-list span {
-    display: inline-block;
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin: 2px;
-}
-
-.example-notice, .peak-time-info {
-    background-color: #eef2ff;
-    border: 1px solid #c7d2fe;
-    color: #4338ca;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-.department-filter-container {
-    max-width: 400px;
-    margin: 0 auto 30px auto;
-}        .no-results p {
-            font-size: 1.1rem;
-            color: #6c757d;
-            font-weight: 500;
-        }
 
         /* DESKTOP: 가로 그리드 레이아웃 복원 (768px+) */
         @media (min-width: 768px) {
@@ -1058,10 +966,6 @@
                 opacity: 0.9;
             }
 
-            .timetable-grid-30 {
-                --slot-height: 45px; /* 데스크톱에서 충분한 높이 */
-            }
-
             /* 기존 고정 그리드 시간표: 가로 그리드 복원 */
             .timetable-grid {
                 display: grid;
@@ -1119,16 +1023,6 @@
             .class-room {
                 font-size: 0.75rem;
                 text-align: center;
-            }
-
-            /* 데스크톱: 차트 컨테이너 최적화 */
-            .chart-container {
-                padding: 30px;
-                min-height: 450px;
-            }
-
-            #heatmap-chart {
-                max-height: 500px;
             }
         }
 
@@ -1246,28 +1140,81 @@
     margin: 6px 0 16px;
     text-align: right;
     font-size: 0.9rem;
-    color: #6c757d;
+    color: #495057;
+    font-weight: 500;
 }
 
-/* --- 건물별 시간표 --- */
-.building-timetable .timetable-grid {
-    grid-template-columns: 80px repeat(5, 1fr);
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.class-list-in-cell {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.8rem;
-    text-align: left;
+
+.modal-content {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 16px;
+    max-width: 350px;
+    width: 90vw;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    position: relative;
 }
-.class-list-in-cell li {
-    margin-bottom: 4px;
-    padding: 3px 5px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-title {
+    margin-bottom: 18px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* 실시간 현황용 통계 카드 (불투명) */
+#home .stats-container {
+    background: transparent;
+    padding: 20px 0;
+}
+
+#home .stat-card {
+    background: white;
+    border: 2px solid #e1e8ed;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+#home .stat-icon {
+    font-size: 2rem;
+}
+
+#home .stat-number {
+    color: #667eea;
+    font-size: 2.5rem;
+}
+
+#home .stat-label {
+    color: #666;
+    font-weight: 600;
 }
 
 /* --- 빈 강의실 검색 결과 그룹화 --- */
@@ -1328,15 +1275,6 @@
     padding: 0 20px 20px 20px;
     background-color: #f8f9ff;
     border-top: 1px solid #e1e8ed;
-}
-
-#consultation-section .schedule-form {
-    grid-template-columns: 1fr auto;
-}
-
-#consultation-section .btn {
-    align-self: end;
-    padding: 12px 20px;
 }
 
 .details-subtitle {

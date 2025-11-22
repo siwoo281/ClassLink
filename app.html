@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>캠퍼스 헬퍼 - 배재대학교</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.1.1"></script>
     <link rel="stylesheet" href="style.css">
-    
 </head>
 <body>
-    <div id="loading-indicator" class="loading-visible">
+    <div id="loading-indicator">
         <div class="spinner"></div>
     </div>
     <div class="container">
@@ -23,7 +20,6 @@
                     <li><a class="nav-link" data-target="search">🔍 빈 강의실 검색</a></li>
                     <li><a class="nav-link" data-target="schedule">🗓️ 스케줄 조회</a></li>
                     <li><a class="nav-link" data-target="roulette">🍔 점심 룰렛</a></li>
-                    <!-- 건물별 시간표 탭 삭제 -->
                 </ul>
             </div>
         </nav>
@@ -108,6 +104,10 @@
                                 <option value="15:00">15:00</option>
                                 <option value="16:00">16:00</option>
                                 <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:00">21:00</option>
                             </select>
                             <div class="time-buttons" style="margin-top:8px;">
                                 <button class="time-btn" data-time="09:00">09:00</button>
@@ -119,6 +119,10 @@
                                 <button class="time-btn" data-time="15:00">15:00</button>
                                 <button class="time-btn" data-time="16:00">16:00</button>
                                 <button class="time-btn" data-time="17:00">17:00</button>
+                                <button class="time-btn" data-time="18:00">18:00</button>
+                                <button class="time-btn" data-time="19:00">19:00</button>
+                                <button class="time-btn" data-time="20:00">20:00</button>
+                                <button class="time-btn" data-time="21:00">21:00</button>
                             </div>
                         </div>
                         <div class="form-group">
@@ -138,6 +142,8 @@
 
             <!-- 실시간 현황(홈) 섹션 -->
             <section id="home">
+                <h1 class="section-title">🏠 실시간 캠퍼스 현황</h1>
+                <p class="section-description">현재 시간 기준 캠퍼스 강의실 사용 현황입니다</p>
                 <div id="current-stats"></div>
                 <div id="current-rooms"></div>
             </section>
@@ -145,8 +151,8 @@
             <!-- 점심 룰렛 섹션 -->
             <section id="roulette" class="section-hidden">
                 <h1 class="section-title">🍔 점심 룰렛</h1>
-                <div style="text-align: center;">
-                    <p style="font-size: 1.2rem; margin-bottom: 30px; color: #666;">
+                <div class="roulette-intro">
+                    <p class="roulette-description">
                         오늘 점심 메뉴를 정하지 못하셨나요?<br>
                         룰렛을 돌려서 맛있는 점심을 추천받아보세요!
                     </p>
@@ -154,19 +160,10 @@
                 </div>
                 <div id="roulette-result"></div>
             </section>
-
-            <!-- 건물별 시간표 섹션 완전 삭제 -->
         </main>
     </div>
 
-        <script src="script.js?v=2"></script>
-    <script>
-        // Cache-busting: Append current timestamp to script src
-        const scriptTag = document.querySelector('script[src^="script.js"]');
-        if (scriptTag) {
-            scriptTag.src = `script.js?v=${new Date().getTime()}`;
-        }
-    </script>
+        <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

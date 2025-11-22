@@ -1,10 +1,11 @@
-const CACHE_NAME = 'campus-helper-cache-v2';
+const CACHE_NAME = 'campus-helper-cache-v3';
 const urlsToCache = [
     '/',
     '/app.html',
+    '/index.html',
     '/style.css',
     '/script.js',
-    '/timetable_flat.json',
+    '/timetable.json',
     '/professors.json',
     '/classrooms.json'
 ];

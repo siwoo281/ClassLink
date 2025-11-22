@@ -1,21 +1,31 @@
-// ===== 건물별 특성(주요 학과, 대표 수업) 추출 및 표시 =====
-
-// 건물별 특성 정보 렌더링
-// 피크타임 정보 렌더링
-// 혼잡도, 특성, 피크타임 등 heatmap 섹션 초기화
-// 혼잡도 등급 산정 및 매핑 함수
-// 시간별 건물 혼잡도 및 특성 계산
-// ===== 데이터 정의 =====
+// ===== 전역 데이터 정의 =====
 let timetableData = [];
 let professorsList = [];
 let classroomsList = [];
-const dayNameMap = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토' };
+
+// ===== 상수 정의 =====
+const DAY_NAMES_ENG = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const DAY_NAMES_KOR = { 
+    'SUN': '일', 'MON': '월', 'TUE': '화', 
+    'WED': '수', 'THU': '목', 'FRI': '금', 'SAT': '토' 
+};
+const DAY_NAME_MAP_SHORT = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토' };
+
+// 타이밍 상수
+const ROULETTE_DELAY_MS = 1500;
+const REALTIME_UPDATE_INTERVAL_MS = 60000;  // 1분
+const RESIZE_DEBOUNCE_MS = 150;
+
+// 임계값
+const LARGE_CLASS_THRESHOLD = 100;  // 대형 강의 기준 (명)
 
 // ===== 데이터 로드 =====
 async function loadTimetableData() {
     const loadingIndicator = document.getElementById('loading-indicator');
-    try {
+    if (loadingIndicator) {
         loadingIndicator.classList.add('loading-visible');
+    }
+    try {
         
         // 모든 데이터를 병렬로 비동기 로드
         const v = new Date().getTime();
@@ -34,16 +44,14 @@ async function loadTimetableData() {
         classroomsList = await classroomsRes.json();
         
         processLoadedData();
-        // heatmap 섹션이 이미 보이면 강제로 한 번 더 렌더링
-        if (document.getElementById('heatmap') && !document.getElementById('heatmap').classList.contains('section-hidden')) {
-            renderHeatmapChart();
-        }
 
     } catch (error) {
         console.error('데이터 로드 실패:', error);
         handleDataLoadError();
     } finally {
-        loadingIndicator.classList.remove('loading-visible');
+        if (loadingIndicator) {
+            loadingIndicator.classList.remove('loading-visible');
+        }
     }
 }
 function processLoadedData() {
@@ -124,6 +132,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
+    // 네비게이션 브랜드 클릭 시 홈으로 이동
+    const navBrand = document.querySelector('.nav-brand');
+    if (navBrand) {
+        navBrand.addEventListener('click', function() {
+            if (nav) nav.classList.remove('nav-open');
+            setActiveSection('home');
+        });
+    }
+
 
     // 해시 기반 진입 및 해시 변경 시 섹션 자동 활성화
     function setActiveSectionFromHash() {
@@ -193,7 +210,9 @@ function initializeScheduleSection() {
                 case 'subject':
                     return (item.subject || '').toLowerCase().includes(query);
                 case 'professor':
-                    return (item.professor || '') === query;
+                    // 여러 교수 처리 (쉼표로 구분)
+                    const professors = (item.professor || '').split(',').map(p => p.trim());
+                    return professors.includes(query);
                 case 'classroom':
                     const [building, room] = query.split('-');
                     return item.building_name === building && item.classroom === room;
@@ -266,15 +285,15 @@ function initializeScheduleSection() {
                 const busiestDayRaw = Object.keys(dayCounts).length > 0 ? Object.keys(dayCounts).reduce((a, b) => dayCounts[a] > dayCounts[b] ? a : b) : null;
                 let residentTimeInfo = '';
                 if (busiestDayRaw) {
-                    const busiestDayClasses = offlineCourses.filter(c => c.day === busiestDayRaw);
-                    const amCount = busiestDayClasses.filter(c => c.start < '12:00').length;
-                    const pmCount = busiestDayClasses.length - amCount;
-                    let timeFocus = '';
-                    if (amCount > pmCount) timeFocus = '오전에';
-                    else if (pmCount > amCount) timeFocus = '오후에';
-                    else timeFocus = '오전/오후에 걸쳐';
-                    
-                    residentTimeInfo = `, 특히 <b>${dayNameMap[busiestDayRaw]}요일 ${timeFocus}</b> 수업이 집중되어 있습니다.`;
+                const busiestDayClasses = offlineCourses.filter(c => c.day === busiestDayRaw);
+                const amCount = busiestDayClasses.filter(c => c.start < '12:00').length;
+                const pmCount = busiestDayClasses.length - amCount;
+                let timeFocus = '';
+                if (amCount > pmCount) timeFocus = '오전에';
+                else if (pmCount > amCount) timeFocus = '오후에';
+                else timeFocus = '오전/오후에 걸쳐';
+                
+                residentTimeInfo = `, 특히 <b>${DAY_NAME_MAP_SHORT[busiestDayRaw]}요일 ${timeFocus}</b> 수업이 집중되어 있습니다.`;
                 }
 
                 if (mainBuilding !== '없음') {
@@ -311,7 +330,7 @@ function initializeScheduleSection() {
                         <div class=\"card-title\">${item.subject}</div>
                         <div class=\"card-content\">
                             <div class=\"schedule-info\"><b>교수:</b> ${professorHtml}</div>
-                            <div class=\"schedule-info\"><b>시간:</b> ${dayNameMap[item.day] || item.day} ${item.start}~${item.end}</div>
+                            <div class=\"schedule-info\"><b>시간:</b> ${DAY_NAME_MAP_SHORT[item.day] || item.day} ${item.start}~${item.end}</div>
                             <div class=\"schedule-info\"><b>강의실:</b> ${roomHtml}</div>
                             <div class=\"schedule-info\"><b>이수:</b> ${item.department || '-'} / <b>학점:</b> ${item.credits || '-'}</div>
                         </div>
@@ -436,7 +455,7 @@ function initializeRouletteSection() {
                 </div>
             `;
             rouletteButton.disabled = false;
-        }, 1500); // 1.5초 후 결과 표시
+        }, ROULETTE_DELAY_MS); // 1.5초 후 결과 표시
     });
 }
 
@@ -455,8 +474,7 @@ function initializeRealTimeSection() {
             if (isHidden) {
                 // --- 온디맨드 렌더링 ---
                 const now = new Date();
-                const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-                const currentDay = dayNames[now.getDay()];
+                const currentDay = DAY_NAMES_ENG[now.getDay()];
                 const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
                 const currentTimeInMinutes = timeStringToMinutes(currentTime);
 
@@ -523,8 +541,7 @@ function initializeRealTimeSection() {
 
 function showEmptyRoomScheduleModal(building, room) {
     const now = new Date();
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    const currentDay = dayNames[now.getDay()];
+    const currentDay = DAY_NAMES_ENG[now.getDay()];
     const currentTimeInMinutes = timeStringToMinutes(now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0'));
 
     const upcomingClasses = timetableData
@@ -541,16 +558,7 @@ function showEmptyRoomScheduleModal(building, room) {
 
     modal = document.createElement('div');
     modal.id = 'room-detail-modal';
-    modal.style.position = 'fixed';
-    modal.style.left = '0';
-    modal.style.top = '0';
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.background = 'rgba(0,0,0,0.35)';
-    modal.style.zIndex = '9999';
-    modal.style.display = 'flex';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
+    modal.className = 'modal-overlay';
     
     let contentHtml = '';
     if (upcomingClasses.length > 0) {
@@ -573,9 +581,69 @@ function showEmptyRoomScheduleModal(building, room) {
     }
 
     modal.innerHTML = `
-        <div style="background:white;padding:30px 20px;border-radius:16px;max-width:350px;width:90vw;box-shadow:0 8px 30px rgba(0,0,0,0.18);position:relative;">
-            <button id="close-room-modal" style="position:absolute;top:10px;right:10px;font-size:1.3rem;background:none;border:none;cursor:pointer;">✖️</button>
-            <h2 style="margin-bottom:18px;font-size:1.2rem;">${building} ${room}</h2>
+        <div class="modal-content">
+            <button class="modal-close" id="close-room-modal">✖️</button>
+            <h2 class="modal-title">${building} ${room}</h2>
+            ${contentHtml}
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.classList.add('modal-open');
+
+    const closeModal = () => {
+        modal.remove();
+        document.body.classList.remove('modal-open');
+    };
+
+    modal.querySelector('#close-room-modal').onclick = closeModal;
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    };
+}
+
+function showEmptyRoomScheduleModalForSearch(building, room, selectedDay) {
+    const allClasses = timetableData
+        .filter(item =>
+            item.building_name === building &&
+            item.classroom === room &&
+            item.day === selectedDay
+        )
+        .sort((a, b) => timeStringToMinutes(a.start) - timeStringToMinutes(b.start));
+
+    let modal = document.getElementById('room-detail-modal');
+    if (modal) modal.remove();
+
+    modal = document.createElement('div');
+    modal.id = 'room-detail-modal';
+    modal.className = 'modal-overlay';
+    
+    let contentHtml = '';
+    if (allClasses.length > 0) {
+        contentHtml = `
+            <h4 class="details-subtitle" style="margin-top:0;">${DAY_NAMES_KOR[selectedDay]}요일 강의</h4>
+            <div class="card-grid" style="grid-template-columns: 1fr; gap: 10px;">
+            ${allClasses.map(item => `
+                <div class="card">
+                    <div class="card-content">
+                        <div><b>${item.subject}</b></div>
+                        <div class="class-prof" style="color: #555;">${getProfessorDisplay(item)}</div>
+                        <div class="time">${item.start} ~ ${item.end}</div>
+                    </div>
+                </div>
+            `).join('')}
+            </div>
+        `;
+    } else {
+        contentHtml = '<div class="card"><div class="card-content" style="color:#38a169; font-weight:600;">이 날은 강의가 없습니다.</div></div>';
+    }
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close" id="close-room-modal">✖️</button>
+            <h2 class="modal-title">${building} ${room}</h2>
             ${contentHtml}
         </div>
     `;
@@ -607,7 +675,7 @@ function initializeSection(sectionId) {
     switch(sectionId) {
         case 'home':
             updateRealTimeStatus();
-            realTimeIntervalId = setInterval(updateRealTimeStatus, 60000); // 1분마다 새로고침
+            realTimeIntervalId = setInterval(updateRealTimeStatus, REALTIME_UPDATE_INTERVAL_MS);
             break;
     }
 }
@@ -637,16 +705,19 @@ function updateRealTimeStatus() {
     if (!timetableData || timetableData.length === 0) return;
 
     const now = new Date();
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    const currentDay = dayNames[now.getDay()];
+    const currentDay = DAY_NAMES_ENG[now.getDay()];
 
     const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     const currentTimeInMinutes = timeStringToMinutes(currentTime);
 
     // 1. 현재 사용 중인 강의실 정보 필터링 (대형 강의 제외)
     const occupiedRooms = timetableData.filter(item => {
-        const subject = item.subject || '';
-        if (item.day !== currentDay || !item.start || !item.end || subject.includes('채플') || subject.includes('기독교와현대사회')) {
+        // 기본 조건 체크
+        if (item.day !== currentDay || !item.start || !item.end) {
+            return false;
+        }
+        // 대형 강의 제외 (수강인원 기준)
+        if (item.student_count && item.student_count >= LARGE_CLASS_THRESHOLD) {
             return false;
         }
         const startMinutes = timeStringToMinutes(item.start);
@@ -683,7 +754,7 @@ function updateRealTimeStatus() {
                 <div class="stat-label">전체</div>
             </div>
         </div>
-        <div class="baseline-time">기준 시각: ${currentDay} ${currentTime}</div>
+        <div class="baseline-time">기준 시각: ${DAY_NAMES_KOR[currentDay]}요일 ${currentTime}</div>
     `;
 
     // 4. 모든 강의실을 건물별로 그룹화 (사용 중/빈 강의실)
@@ -754,12 +825,19 @@ function initializeSearchSection() {
     if (searchNowButton) {
         searchNowButton.addEventListener('click', () => {
             const now = new Date();
-            const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-            const currentDay = dayNames[now.getDay()];
+            const currentDay = DAY_NAMES_ENG[now.getDay()];
             const currentHour = now.getHours();
 
-            // 주말이거나, 9-17시 사이가 아니면 검색하지 않음
-            if (currentDay === 'SUN' || currentDay === 'SAT' || currentHour < 9 || currentHour >= 18) {
+            // 주말 체크
+            if (currentDay === 'SUN' || currentDay === 'SAT') {
+                resultsContainer.innerHTML = getNoResultsMessage('주말에는 수업이 없습니다.');
+                daySelect.value = '';
+                timeSelect.value = '';
+                return;
+            }
+
+            // 수업 시간 범위 체크 (8시~22시)
+            if (currentHour < 8 || currentHour >= 22) {
                 resultsContainer.innerHTML = getNoResultsMessage('현재는 수업이 없는 시간입니다.');
                 daySelect.value = '';
                 timeSelect.value = '';
@@ -804,13 +882,15 @@ function initializeSearchSection() {
         }
 
         // 1. 해당 요일, 시간에 사용 중인 강의실 목록 생성
+        const timeMinutes = timeStringToMinutes(time);
         const occupiedRooms = new Set(
             timetableData
-                .filter(item => 
-                    item.day === day &&
-                    item.start && item.end &&
-                    time >= item.start && time < item.end
-                )
+                .filter(item => {
+                    if (item.day !== day || !item.start || !item.end) return false;
+                    const startMinutes = timeStringToMinutes(item.start);
+                    const endMinutes = timeStringToMinutes(item.end);
+                    return timeMinutes >= startMinutes && timeMinutes < endMinutes;
+                })
                 .map(item => `${item.building_name}-${item.classroom}`)
         );
 
@@ -842,7 +922,7 @@ function initializeSearchSection() {
                     <div class="building-title">${building} (${groupedByBuilding[building].length}개)</div>
                     <div class="card-grid empty-grid">
                         ${groupedByBuilding[building].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(room => `
-                            <div class="card empty-room-card">
+                            <div class="card empty-room-card" data-building="${building}" data-room="${room}">
                                 <div class="card-title">${room}</div>
                             </div>
                         `).join('')}
@@ -868,75 +948,17 @@ function initializeSearchSection() {
     });
     classroomSelect.addEventListener('change', performSearch);
 
-    // 모달 생성 함수
-    function showRoomDetailModal(building, room, used, day, time) {
-        let modal = document.getElementById('room-detail-modal');
-        if (modal) modal.remove(); // 이전 모달 제거
-
-        modal = document.createElement('div');
-        modal.id = 'room-detail-modal';
-        modal.style.position = 'fixed';
-        modal.style.left = '0';
-        modal.style.top = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.background = 'rgba(0,0,0,0.35)';
-        modal.style.zIndex = '9999';
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        
-        modal.innerHTML = `<div style="background:white;padding:30px 20px;border-radius:16px;max-width:350px;width:90vw;box-shadow:0 8px 30px rgba(0,0,0,0.18);position:relative;">
-            <button id="close-room-modal" style="position:absolute;top:10px;right:10px;font-size:1.3rem;background:none;border:none;cursor:pointer;">✖️</button>
-            <h2 style="margin-bottom:18px;font-size:1.2rem;">${building} ${room} 상세 내역</h2>
-            <div style="margin-bottom:10px;font-size:0.98rem;color:#555;">${day ? day+'요일 ' : ''}${time ? time+'시' : ''}</div>
-            ${used.length ? `<div style="margin-bottom:10px;">해당 시간에 사용 중인 강의가 있습니다:</div>` + used.map(item =>
-                `<div style="background:#f8f9fa;padding:10px;border-radius:8px;margin-bottom:8px;">
-                    <b>${item.subject}</b> (${item.code})<br>
-                    교수: ${getProfessorDisplay(item)}<br>
-                    시간: ${item.day} ${item.start}~${item.end}
-                </div>`
-            ).join('') : '<div style="color:#667eea;font-weight:600;">해당 시간에 사용 내역 없음 (빈 강의실)</div>'}
-        </div>`;
-        
-        document.body.appendChild(modal);
-        document.body.classList.add('modal-open');
-
-        const closeModal = () => {
-            modal.remove();
-            document.body.classList.remove('modal-open');
-        };
-
-        modal.querySelector('#close-room-modal').onclick = closeModal;
-        modal.onclick = function(e) {
-            if (e.target === modal) {
-                closeModal();
+    // 검색 결과 빈 강의실 클릭 이벤트 (이벤트 위임)
+    resultsContainer.addEventListener('click', (e) => {
+        const emptyRoomCard = e.target.closest('.empty-room-card');
+        if (emptyRoomCard) {
+            const building = emptyRoomCard.dataset.building;
+            const room = emptyRoomCard.dataset.room;
+            if (building && room) {
+                showEmptyRoomScheduleModalForSearch(building, room, daySelect.value);
             }
-        };
-    }
-}
-
-function estimateConsultationTimes(professorName, day) {
-    const classes = timetableData
-        .filter(item => (item.professor || '').includes(professorName) && item.day === day)
-        .sort((a, b) => a.start.localeCompare(b.start));
-
-    const freeSlots = [];
-    let currentTime = '09:00';
-    const endOfDay = '18:00';
-
-    classes.forEach(c => {
-        if (currentTime < c.start) {
-            freeSlots.push({ start: currentTime, end: c.start });
         }
-        currentTime = c.end;
     });
-
-    if (currentTime < endOfDay) {
-        freeSlots.push({ start: currentTime, end: endOfDay });
-    }
-
-    return freeSlots;
 }
 
 // (This is a simplified representation)
@@ -1076,7 +1098,7 @@ function debounce(func, wait) {
 }
 
 // 창 크기 변경 시 시간표 스케일 재조정 (Debounce 적용으로 성능 최적화)
-window.addEventListener('resize', debounce(applyAllTimetablesScale, 150));
+window.addEventListener('resize', debounce(applyAllTimetablesScale, RESIZE_DEBOUNCE_MS));
 
 function getNoResultsMessage(message) {
     return `
