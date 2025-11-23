@@ -542,6 +542,40 @@
             margin: 5px 0;
         }
 
+        /* No Results / Empty State */
+        .no-results {
+            text-align: center;
+            padding: 80px 30px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-radius: 20px;
+            margin: 30px 0;
+            border: 2px dashed #d0d9e8;
+        }
+
+        .no-results-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .no-results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .no-results-subtitle {
+            font-size: 1rem;
+            color: #777;
+            margin: 0;
+        }
+
         /* Search Buttons */
         .search-buttons {
             display: grid;
@@ -1059,6 +1093,11 @@
 
             .section-title {
                 font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .section-description {
+                font-size: 0.95rem;
             }
             
             .stats-container {
@@ -1080,15 +1119,69 @@
 
             .search-form {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            /* 모바일에서 검색 폼 요소 크기 */
+            .form-group label {
+                font-size: 0.95rem;
+                margin-bottom: 6px;
+            }
+
+            .form-group select,
+            .form-group input {
+                font-size: 1rem;
+                padding: 12px;
+            }
+
+            /* 카드 그리드 모바일 최적화 */
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            /* 검색 결과 카드 */
+            .schedule-card {
+                padding: 15px;
+            }
+
+            .schedule-info {
+                font-size: 0.9rem;
             }
 
             /* 터치 영역 확보 및 하이라이트 제거 */
             .btn, .time-btn, .nav-link, .dashboard-card {
-                min-height: 44px;
+                min-height: 48px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 -webkit-tap-highlight-color: transparent;
+                font-size: 1rem;
+            }
+
+            /* 모바일에서 빈 결과 메시지 */
+            .no-results {
+                padding: 60px 20px;
+            }
+
+            .no-results-icon {
+                font-size: 4rem;
+            }
+
+            .no-results-title {
+                font-size: 1.2rem;
+            }
+
+            .no-results-subtitle {
+                font-size: 0.9rem;
             }
 
             /* 모바일에서는 가로 스크롤을 없애고(기본은 숨김), 자동 축소로 한 화면에 맞춤 */
@@ -1097,9 +1190,109 @@
                 padding: 15px;
             }
 
+            .timetable-title {
+                font-size: 1.2rem;
+            }
+
+            .day-header {
+                font-size: 0.75rem;
+                padding: 8px 4px;
+            }
+
+            .time-label {
+                font-size: 0.7rem;
+                padding: 8px 4px;
+            }
+
+            .subject-block {
+                font-size: 0.65rem;
+                padding: 4px;
+                min-height: 50px;
+            }
+
+            /* 모달 모바일 최적화 */
+            .modal-content {
+                width: 95%;
+                max-width: 95vw;
+                max-height: 85vh;
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .modal-close {
+                font-size: 2rem;
+                width: 40px;
+                height: 40px;
+            }
+
             /* 모바일에서 그리드 기본 글자 크기 약간 축소 (스케일 전 가독성 보정) */
             .class-subject { font-size: 0.95rem; }
             .class-room { font-size: 0.8rem; }
+
+            /* 건물 상세 정보 모바일 최적화 */
+            .building-details {
+                padding: 15px;
+                max-height: 500px;
+            }
+
+            .building-details h3 {
+                font-size: 1.1rem;
+            }
+
+            .building-details ul {
+                padding-left: 20px;
+            }
+
+            .building-details li {
+                font-size: 0.9rem;
+                padding: 8px 0;
+            }
+
+            /* 룰렛 섹션 모바일 최적화 */
+            .roulette-intro,
+            .roulette-description {
+                font-size: 0.95rem;
+                padding: 0 10px;
+            }
+
+            .roulette-thinking {
+                font-size: 1.2rem;
+                padding: 20px;
+            }
+
+            .roulette-final-result {
+                padding: 20px;
+            }
+
+            .selected-menu {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
+
+            /* 실시간 현황 카드 */
+            .dashboard-card {
+                padding: 15px;
+            }
+
+            .dashboard-card h3 {
+                font-size: 1rem;
+            }
+
+            .time-display {
+                font-size: 1.3rem;
+            }
+
+            .room-name {
+                font-size: 0.9rem;
+            }
+
+            .room-info {
+                font-size: 0.8rem;
+            }
         }
 
         /* Tablet/Desktop layout for dashboard */

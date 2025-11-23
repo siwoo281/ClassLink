@@ -1196,8 +1196,9 @@ window.addEventListener('resize', debounce(applyAllTimetablesScale, RESIZE_DEBOU
 function getNoResultsMessage(message) {
     return `
         <div class="no-results">
-            <div class="no-results-icon">🤷</div>
-            <p>${message}</p>
+            <div class="no-results-icon">😔</div>
+            <p class="no-results-title">${message}</p>
+            <p class="no-results-subtitle">다른 조건으로 검색해보세요!</p>
         </div>
     `;
 }
