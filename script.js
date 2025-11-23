@@ -203,10 +203,29 @@ function initializeScheduleSection() {
             resultsContainer.innerHTML = `
                 <div class="search-info">
                     <p><strong>💡 검색 안내</strong></p>
-                    <p><strong>과목명:</strong> 찾고 싶은 과목 이름을 입력하세요 (예: "프로그래밍", "영어")</p>
-                    <p><strong>교수명:</strong> 드롭다운에서 교수님을 선택하세요</p>
-                    <p><strong>강의실:</strong> 드롭다운에서 강의실을 선택하세요</p>
-                    <p style="margin-top: 10px; color: #667eea;">요일 필터를 사용하면 특정 요일 강의만 볼 수 있습니다.</p>
+                    <p style="margin-bottom: 15px; color: #555;">원하는 검색 유형을 선택하고 정보를 확인하세요!</p>
+                    
+                    <p><strong>📚 과목명 검색</strong></p>
+                    <p style="margin-left: 20px; margin-bottom: 12px;">
+                        과목 이름을 입력하면 <span style="color: #667eea;">강의 시간, 교수님, 강의실, 학점</span> 등 모든 정보를 확인할 수 있습니다.<br>
+                        예: "프로그래밍", "영어", "수학"
+                    </p>
+                    
+                    <p><strong>👨‍🏫 교수명 검색</strong></p>
+                    <p style="margin-left: 20px; margin-bottom: 12px;">
+                        교수님을 선택하면 <span style="color: #667eea;">해당 교수님의 전체 강의 시간표</span>를 한눈에 볼 수 있습니다.<br>
+                        수업 시간, 강의실, 요일별 스케줄이 표시됩니다.
+                    </p>
+                    
+                    <p><strong>🏛️ 강의실 검색</strong></p>
+                    <p style="margin-left: 20px; margin-bottom: 12px;">
+                        강의실을 선택하면 <span style="color: #667eea;">그 강의실에서 진행되는 모든 수업</span>을 확인할 수 있습니다.<br>
+                        언제, 어떤 과목이 진행되는지 알 수 있습니다.
+                    </p>
+                    
+                    <p style="margin-top: 15px; padding: 10px; background: #f0f4ff; border-radius: 8px; color: #667eea;">
+                        <strong>💡 팁:</strong> 요일 필터를 함께 사용하면 특정 요일의 강의만 볼 수 있어요!
+                    </p>
                 </div>
             `;
             onlineCoursesContainer.innerHTML = '';
