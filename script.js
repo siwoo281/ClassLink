@@ -194,23 +194,18 @@ function initializeScheduleSection() {
             case 'classroom':
                 query = classroomSelect.value;
                 break;
-            case 'missing-professor':
-                query = '미지정';
-                break;
             default:
                 query = searchInput.value.trim().toLowerCase();
                 break;
         }
 
-        if (type !== 'missing-professor' && !query) {
+        if (!query) {
             resultsContainer.innerHTML = `
                 <div class="search-info">
                     <p><strong>💡 검색 안내</strong></p>
                     <p><strong>과목명:</strong> 찾고 싶은 과목 이름을 입력하세요 (예: "프로그래밍", "영어")</p>
                     <p><strong>교수명:</strong> 드롭다운에서 교수님을 선택하세요</p>
-                    <p><strong>학과/단과대:</strong> 학과나 단과대 이름을 입력하세요 (예: "컴퓨터공학", "AI")</p>
                     <p><strong>강의실:</strong> 드롭다운에서 강의실을 선택하세요</p>
-                    <p><strong>교수명 누락 강의:</strong> 교수 정보가 없는 강의를 검색합니다</p>
                     <p style="margin-top: 10px; color: #667eea;">요일 필터를 사용하면 특정 요일 강의만 볼 수 있습니다.</p>
                 </div>
             `;
@@ -233,8 +228,6 @@ function initializeScheduleSection() {
                 case 'classroom':
                     const [building, room] = query.split('-');
                     return item.building_name === building && item.classroom === room;
-                case 'missing-professor':
-                    return !item.professor || item.professor === '미지정';
                 default:
                     return false;
             }
@@ -400,8 +393,6 @@ function initializeScheduleSection() {
                 break;
             case 'classroom':
                 classroomSelectGroup.style.display = 'block';
-                break;
-            case 'missing-professor':
                 break;
             default:
                 searchInputGroup.style.display = 'block';
