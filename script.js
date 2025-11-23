@@ -120,7 +120,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const targetId = this.getAttribute('data-target');
-            if (nav) nav.classList.remove('nav-open');
+            if (nav) {
+                nav.classList.remove('nav-open');
+                if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+            }
             setActiveSection(targetId);
         });
     });
@@ -128,7 +131,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     const menuToggle = document.getElementById('menu-toggle');
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
-            nav.classList.toggle('nav-open');
+            const isOpen = nav.classList.toggle('nav-open');
+            menuToggle.setAttribute('aria-expanded', isOpen);
         });
     }
 
@@ -136,7 +140,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const navBrand = document.querySelector('.nav-brand');
     if (navBrand) {
         navBrand.addEventListener('click', function() {
-            if (nav) nav.classList.remove('nav-open');
+            if (nav) {
+                nav.classList.remove('nav-open');
+                if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+            }
             setActiveSection('home');
         });
     }
@@ -196,7 +203,17 @@ function initializeScheduleSection() {
         }
 
         if (type !== 'missing-professor' && !query) {
-            resultsContainer.innerHTML = getNoResultsMessage('검색어를 입력하거나 선택해주세요.');
+            resultsContainer.innerHTML = `
+                <div class="search-info">
+                    <p><strong>💡 검색 안내</strong></p>
+                    <p><strong>과목명:</strong> 찾고 싶은 과목 이름을 입력하세요 (예: "프로그래밍", "영어")</p>
+                    <p><strong>교수명:</strong> 드롭다운에서 교수님을 선택하세요</p>
+                    <p><strong>학과/단과대:</strong> 학과나 단과대 이름을 입력하세요 (예: "컴퓨터공학", "AI")</p>
+                    <p><strong>강의실:</strong> 드롭다운에서 강의실을 선택하세요</p>
+                    <p><strong>교수명 누락 강의:</strong> 교수 정보가 없는 강의를 검색합니다</p>
+                    <p style="margin-top: 10px; color: #667eea;">요일 필터를 사용하면 특정 요일 강의만 볼 수 있습니다.</p>
+                </div>
+            `;
             onlineCoursesContainer.innerHTML = '';
             return;
         }
@@ -582,7 +599,7 @@ function showEmptyRoomScheduleModal(building, room) {
 
     modal.innerHTML = `
         <div class="modal-content">
-            <button class="modal-close" id="close-room-modal">✖️</button>
+            <button class="modal-close" id="close-room-modal" aria-label="모달 닫기">✖️</button>
             <h2 class="modal-title">${building} ${room}</h2>
             ${contentHtml}
         </div>
@@ -591,11 +608,40 @@ function showEmptyRoomScheduleModal(building, room) {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
+    // 포커스 트랩 설정
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    // 첫 번째 요소에 포커스
+    if (firstFocusable) firstFocusable.focus();
+
+    const trapFocus = (e) => {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        }
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    };
+
     const closeModal = () => {
+        modal.removeEventListener('keydown', trapFocus);
         modal.remove();
         document.body.classList.remove('modal-open');
     };
 
+    modal.addEventListener('keydown', trapFocus);
     modal.querySelector('#close-room-modal').onclick = closeModal;
     modal.onclick = function(e) {
         if (e.target === modal) {
@@ -642,7 +688,7 @@ function showEmptyRoomScheduleModalForSearch(building, room, selectedDay) {
 
     modal.innerHTML = `
         <div class="modal-content">
-            <button class="modal-close" id="close-room-modal">✖️</button>
+            <button class="modal-close" id="close-room-modal" aria-label="모달 닫기">✖️</button>
             <h2 class="modal-title">${building} ${room}</h2>
             ${contentHtml}
         </div>
@@ -651,11 +697,40 @@ function showEmptyRoomScheduleModalForSearch(building, room, selectedDay) {
     document.body.appendChild(modal);
     document.body.classList.add('modal-open');
 
+    // 포커스 트랩 설정
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    // 첫 번째 요소에 포커스
+    if (firstFocusable) firstFocusable.focus();
+
+    const trapFocus = (e) => {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        }
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    };
+
     const closeModal = () => {
+        modal.removeEventListener('keydown', trapFocus);
         modal.remove();
         document.body.classList.remove('modal-open');
     };
 
+    modal.addEventListener('keydown', trapFocus);
     modal.querySelector('#close-room-modal').onclick = closeModal;
     modal.onclick = function(e) {
         if (e.target === modal) {
@@ -877,7 +952,15 @@ function initializeSearchSection() {
         const classroomFilter = classroomSelect.value;
 
         if (!day || !time) {
-            resultsContainer.innerHTML = getNoResultsMessage('요일과 시간을 모두 선택해주세요.');
+            resultsContainer.innerHTML = `
+                <div class="search-info">
+                    <p><strong>💡 사용 방법</strong></p>
+                    <p>1. 요일을 선택하세요 (월~토)</p>
+                    <p>2. 시간을 선택하세요 (09:00~21:00)</p>
+                    <p>3. 필요시 특정 강의실을 선택하세요 (선택사항)</p>
+                    <p style="margin-top: 10px;">또는 <strong>📍 지금 바로 검색</strong> 버튼을 눌러 현재 시간의 빈 강의실을 확인하세요!</p>
+                </div>
+            `;
             return;
         }
 
