@@ -1106,8 +1106,7 @@ function generateVisualTimetable(classes, titleName) {
             const nextClass = sortedClasses[i];
             const isSameClass = currentClass.subject === nextClass.subject &&
                                 currentClass.day === nextClass.day &&
-                                getRoomDisplay(currentClass) === getRoomDisplay(nextClass) &&
-                                getProfessorDisplay(currentClass) === getProfessorDisplay(nextClass);
+                                getRoomDisplay(currentClass) === getRoomDisplay(nextClass);
 
             if (isSameClass && currentClass.end === nextClass.start) {
                 currentClass.end = nextClass.end; // 연속되면 end 시간만 업데이트

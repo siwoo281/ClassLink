@@ -831,6 +831,12 @@
             font-weight: 600;
         }
 
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         .no-results {
             text-align: center;
             padding: 50px 20px;
@@ -1225,25 +1231,19 @@
                 height: 40px;
             }
 
-            /* 모바일에서 그리드 기본 글자 크기 최적화 (가독성 개선) */
-            .class-subject { 
-                font-size: 1rem; 
-                font-weight: 700;
-                margin-bottom: 2px;
-            }
-            .class-room { 
-                font-size: 0.88rem; 
-                margin-top: 4px;
-                margin-bottom: 0;
-            }
-            .class-prof {
-                display: none; /* 교수명 숨김 */
-            }
-            
-            /* 모바일 시간표 블록 터치 영역 확대 */
+            /* 모바일 시간표 블록 최적화 */
             .class-block {
                 padding: 10px 8px;
                 min-height: 60px;
+            }
+            
+            .class-subject { 
+                font-size: 1rem; 
+                font-weight: 700;
+            }
+            
+            .class-room { 
+                font-size: 0.88rem;
             }
             
             /* 모바일 교수 통계 카드 1열 레이아웃 */
@@ -1274,7 +1274,7 @@
             
             /* 모바일 시간표 그리드 최소 너비 조정 */
             .timetable-grid-30 {
-                min-width: 640px; /* 720px에서 640px로 축소 */
+                min-width: 560px; /* 모바일 최적화 (720px → 560px) */
             }
 
             /* 건물 상세 정보 모바일 최적화 */
