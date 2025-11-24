@@ -1184,10 +1184,11 @@
                 font-size: 0.9rem;
             }
 
-            /* 모바일에서는 가로 스크롤을 없애고(기본은 숨김), 자동 축소로 한 화면에 맞춤 */
+            /* 모바일에서는 가로 스크롤 허용 (시간표 가독성 우선) */
             .timetable-container {
-                overflow-x: hidden;
+                overflow-x: auto;
                 padding: 15px;
+                -webkit-overflow-scrolling: touch;
             }
 
             .timetable-title {
@@ -1229,9 +1230,56 @@
                 height: 40px;
             }
 
-            /* 모바일에서 그리드 기본 글자 크기 약간 축소 (스케일 전 가독성 보정) */
-            .class-subject { font-size: 0.95rem; }
-            .class-room { font-size: 0.8rem; }
+            /* 모바일에서 그리드 기본 글자 크기 최적화 (가독성 개선) */
+            .class-subject { 
+                font-size: 1rem; 
+                font-weight: 700;
+                margin-bottom: 2px;
+            }
+            .class-room { 
+                font-size: 0.85rem; 
+                margin-bottom: 1px;
+            }
+            .class-prof {
+                font-size: 0.82rem;
+            }
+            
+            /* 모바일 시간표 블록 터치 영역 확대 */
+            .class-block {
+                padding: 10px 8px;
+                min-height: 60px;
+            }
+            
+            /* 모바일 교수 통계 카드 1열 레이아웃 */
+            .timetable-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .timetable-stat {
+                padding: 12px;
+            }
+            
+            .timetable-stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .timetable-stat-label {
+                font-size: 0.85rem;
+            }
+            
+            /* 모바일 시간표 헤더 개선 */
+            .timetable-header h3 {
+                font-size: 1.3rem;
+                line-height: 1.4;
+                word-break: keep-all;
+            }
+            
+            /* 모바일 시간표 그리드 최소 너비 조정 */
+            .timetable-grid-30 {
+                min-width: 640px; /* 720px에서 640px로 축소 */
+            }
 
             /* 건물 상세 정보 모바일 최적화 */
             .building-details {
