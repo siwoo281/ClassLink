@@ -50,7 +50,7 @@ async function loadTimetableData() {
         handleDataLoadError();
     } finally {
         if (loadingIndicator) {
-            loadingIndicator.classList.remove('loading-visible');
+        loadingIndicator.classList.remove('loading-visible');
         }
     }
 }
@@ -314,14 +314,14 @@ function initializeScheduleSection() {
                 const busiestDayRaw = Object.keys(dayCounts).length > 0 ? Object.keys(dayCounts).reduce((a, b) => dayCounts[a] > dayCounts[b] ? a : b) : null;
                 let residentTimeInfo = '';
                 if (busiestDayRaw) {
-                const busiestDayClasses = offlineCourses.filter(c => c.day === busiestDayRaw);
-                const amCount = busiestDayClasses.filter(c => c.start < '12:00').length;
-                const pmCount = busiestDayClasses.length - amCount;
-                let timeFocus = '';
-                if (amCount > pmCount) timeFocus = '오전에';
-                else if (pmCount > amCount) timeFocus = '오후에';
-                else timeFocus = '오전/오후에 걸쳐';
-                
+                    const busiestDayClasses = offlineCourses.filter(c => c.day === busiestDayRaw);
+                    const amCount = busiestDayClasses.filter(c => c.start < '12:00').length;
+                    const pmCount = busiestDayClasses.length - amCount;
+                    let timeFocus = '';
+                    if (amCount > pmCount) timeFocus = '오전에';
+                    else if (pmCount > amCount) timeFocus = '오후에';
+                    else timeFocus = '오전/오후에 걸쳐';
+                    
                 residentTimeInfo = `, 특히 <b>${DAY_NAME_MAP_SHORT[busiestDayRaw]}요일 ${timeFocus}</b> 수업이 집중되어 있습니다.`;
                 }
 
@@ -1049,7 +1049,7 @@ function initializeSearchSection() {
             const room = emptyRoomCard.dataset.room;
             if (building && room) {
                 showEmptyRoomScheduleModalForSearch(building, room, daySelect.value);
-            }
+    }
         }
     });
 }
@@ -1082,10 +1082,10 @@ function generateVisualTimetable(classes, titleName) {
         }
     }
 
-    // 3. 배경 '공강' 블록
+    // 3. 배경 '공강' 블록 (텍스트 제거, 배경색으로만 표시)
     for (let d = 0; d < days.length; d++) {
         for (let t = 0; t < timeSlots; t++) {
-            tableHtml += `<div class="empty-slot-block" style="grid-column: ${d + 2}; grid-row: ${t + 2};"><span class="empty-slot-text">공강</span></div>`;
+            tableHtml += `<div class="empty-slot-block" style="grid-column: ${d + 2}; grid-row: ${t + 2};"></div>`;
         }
     }
 
@@ -1138,7 +1138,6 @@ function generateVisualTimetable(classes, titleName) {
                 <div class="class-block" style="grid-column: ${dayIndex + 2}; grid-row: ${startRow} / span ${rowSpan}; z-index: 10;">
                     <div class="class-subject">${c.subject}</div>
                     <div class="class-room">${getRoomDisplay(c)}</div>
-                    <div class="class-prof">${getProfessorDisplay(c)}</div>
                 </div>
             `;
         }
