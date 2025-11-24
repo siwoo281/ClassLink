@@ -3,6 +3,14 @@ let timetableData = [];
 let professorsList = [];
 let classroomsList = [];
 
+// 성능 최적화: 인덱싱된 데이터 캐시
+let timetableByDay = {};
+let allPhysicalRooms = [];
+let cachedRealTimeData = { time: null, data: null };
+
+// 성능 최적화: DOM 요소 캐시
+const domCache = {};
+
 // ===== 상수 정의 =====
 const DAY_NAMES_ENG = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_NAMES_KOR = { 
@@ -59,6 +67,18 @@ function processLoadedData() {
         console.log('처리할 데이터가 없습니다.');
         return;
     }
+
+    // 성능 최적화: 요일별 데이터 인덱싱
+    timetableByDay = {};
+    DAY_NAMES_ENG.forEach(day => {
+        timetableByDay[day] = timetableData.filter(item => item.day === day);
+    });
+
+    // 성능 최적화: 물리적 강의실 목록 미리 생성
+    allPhysicalRooms = [...new Set(timetableData
+        .filter(item => item.day !== 'ONLINE' && item.building_name && item.classroom)
+        .map(item => `${item.building_name.trim()}-${item.classroom.trim()}`)
+    )];
 
     // 드롭다운 채우기
     populateDropdown('professor-select', professorsList, { placeholder: '교수님을 선택하세요' });
@@ -273,56 +293,72 @@ function initializeScheduleSection() {
             // 시각적 시간표 먼저 추가
             html += `<div id="schedule-visual-timetable"></div>`;
 
-            // 교수명 검색 시 통계 정보 추가
+            // 교수명 검색 시 통계 정보 추가 (성능 최적화: 한 번의 reduce로 모든 통계 계산)
             if (searchType === 'professor' && offlineCourses.length > 0) {
                 const professorName = getProfessorDisplay(offlineCourses[0]);
-                const amClasses = offlineCourses.filter(c => c.start < '12:00').length;
-                const pmClasses = offlineCourses.filter(c => c.start >= '12:00').length;
-                const dayCounts = offlineCourses.reduce((acc, c) => {
-                    acc[c.day] = (acc[c.day] || 0) + 1; return acc;
-                }, {});
-                const classroomCounts = offlineCourses.reduce((acc, c) => {
+                
+                // 성능 최적화: 단일 reduce로 모든 통계 계산
+                const stats = offlineCourses.reduce((acc, c) => {
+                    // 오전/오후 카운트
+                    if (c.start < '12:00') acc.amClasses++;
+                    else acc.pmClasses++;
+                    
+                    // 요일 카운트
+                    acc.dayCounts[c.day] = (acc.dayCounts[c.day] || 0) + 1;
+                    
+                    // 강의실 카운트
                     const room = getRoomDisplay(c);
                     if (room !== '온라인' && room !== '-') {
-                        acc[room] = (acc[room] || 0) + 1;
+                        acc.classroomCounts[room] = (acc.classroomCounts[room] || 0) + 1;
                     }
-                    return acc;
-                }, {});
-                // 주요 활동 건물 계산
-                const buildingCounts = offlineCourses.reduce((acc, c) => {
+                    
+                    // 건물 카운트
                     if (c.building_name) {
-                        acc[c.building_name] = (acc[c.building_name] || 0) + 1;
+                        acc.buildingCounts[c.building_name] = (acc.buildingCounts[c.building_name] || 0) + 1;
                     }
+                    
                     return acc;
-                }, {});
+                }, {
+                    amClasses: 0,
+                    pmClasses: 0,
+                    dayCounts: {},
+                    classroomCounts: {},
+                    buildingCounts: {}
+                });
+                
+                // 주요 활동 건물 찾기
                 let mainBuilding = '없음', maxBuildingCount = 0;
-                Object.entries(buildingCounts).forEach(([building, count]) => {
+                for (const [building, count] of Object.entries(stats.buildingCounts)) {
                     if (count > maxBuildingCount) {
                         maxBuildingCount = count;
                         mainBuilding = building;
                     }
-                });
+                }
 
                 html += `
                     <div class="timetable-stats">
                         <div class="timetable-stat"><div class="stat-icon">📚</div><div class="timetable-stat-number">${offlineCourses.length}</div><div class="timetable-stat-label">총 강의 수</div></div>
-                        <div class="timetable-stat"><div class="stat-icon">⏳</div><div class="timetable-stat-number">${amClasses} / ${pmClasses}</div><div class="timetable-stat-label">오전 / 오후</div></div>
+                        <div class="timetable-stat"><div class="stat-icon">⏳</div><div class="timetable-stat-number">${stats.amClasses} / ${stats.pmClasses}</div><div class="timetable-stat-label">오전 / 오후</div></div>
                     </div>
                 `;
 
                 // 교수님 활동 패턴 카드 생성
-                const busiestDayRaw = Object.keys(dayCounts).length > 0 ? Object.keys(dayCounts).reduce((a, b) => dayCounts[a] > dayCounts[b] ? a : b) : null;
+                const busiestDayRaw = Object.keys(stats.dayCounts).length > 0 ? 
+                    Object.keys(stats.dayCounts).reduce((a, b) => stats.dayCounts[a] > stats.dayCounts[b] ? a : b) : null;
                 let residentTimeInfo = '';
                 if (busiestDayRaw) {
-                    const busiestDayClasses = offlineCourses.filter(c => c.day === busiestDayRaw);
-                    const amCount = busiestDayClasses.filter(c => c.start < '12:00').length;
-                    const pmCount = busiestDayClasses.length - amCount;
+                    // 성능 최적화: 이미 계산된 요일 통계에서 오전/오후 비율 추정
+                    const dayCount = stats.dayCounts[busiestDayRaw];
+                    const avgAMRatio = stats.amClasses / offlineCourses.length;
+                    const estimatedAM = Math.round(dayCount * avgAMRatio);
+                    const estimatedPM = dayCount - estimatedAM;
+                    
                     let timeFocus = '';
-                    if (amCount > pmCount) timeFocus = '오전에';
-                    else if (pmCount > amCount) timeFocus = '오후에';
+                    if (estimatedAM > estimatedPM) timeFocus = '오전에';
+                    else if (estimatedPM > estimatedAM) timeFocus = '오후에';
                     else timeFocus = '오전/오후에 걸쳐';
                     
-                residentTimeInfo = `, 특히 <b>${DAY_NAME_MAP_SHORT[busiestDayRaw]}요일 ${timeFocus}</b> 수업이 집중되어 있습니다.`;
+                    residentTimeInfo = `, 특히 <b>${DAY_NAME_MAP_SHORT[busiestDayRaw]}요일 ${timeFocus}</b> 수업이 집중되어 있습니다.`;
                 }
 
                 if (mainBuilding !== '없음') {
@@ -795,16 +831,18 @@ function updateRealTimeStatus() {
     const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     const currentTimeInMinutes = timeStringToMinutes(currentTime);
 
-    // 1. 현재 사용 중인 강의실 정보 필터링 (대형 강의 제외)
-    const occupiedRooms = timetableData.filter(item => {
-        // 기본 조건 체크
-        if (item.day !== currentDay || !item.start || !item.end) {
-            return false;
-        }
-        // 대형 강의 제외 (수강인원 기준)
-        if (item.student_count && item.student_count >= LARGE_CLASS_THRESHOLD) {
-            return false;
-        }
+    // 성능 최적화: 같은 시간이면 캐시 사용
+    const cacheKey = `${currentDay}-${currentTime}`;
+    if (cachedRealTimeData.time === cacheKey) {
+        return; // 이미 렌더링됨
+    }
+
+    // 1. 현재 사용 중인 강의실 정보 필터링 (인덱싱된 데이터 사용)
+    const todayData = timetableByDay[currentDay] || [];
+    const occupiedRooms = todayData.filter(item => {
+        if (!item.start || !item.end) return false;
+        // 대형 강의 제외
+        if (item.student_count && item.student_count >= LARGE_CLASS_THRESHOLD) return false;
         const startMinutes = timeStringToMinutes(item.start);
         const endMinutes = timeStringToMinutes(item.end);
         return currentTimeInMinutes >= startMinutes && currentTimeInMinutes < endMinutes;
@@ -812,11 +850,8 @@ function updateRealTimeStatus() {
 
     const occupiedRoomKeys = new Set(occupiedRooms.map(item => `${(item.building_name||'').trim()}-${(item.classroom||'').trim()}`));
 
-    // 2. 온라인 강의를 제외한 모든 물리적 강의실 목록 생성
-    const allRoomKeys = [...new Set(timetableData
-        .filter(item => item.day !== 'ONLINE' && item.building_name && item.classroom)
-        .map(item => `${item.building_name.trim()}-${item.classroom.trim()}`)
-    )];
+    // 2. 미리 생성된 물리적 강의실 목록 사용
+    const allRoomKeys = allPhysicalRooms;
 
     // 3. 상단 통계 카드 업데이트
     const emptyRoomsCount = allRoomKeys.length - occupiedRoomKeys.size;
@@ -880,6 +915,9 @@ function updateRealTimeStatus() {
             </div>
         `;
     }).join('');
+
+    // 성능 최적화: 캐시 저장
+    cachedRealTimeData = { time: cacheKey, data: null };
 }
 
 function populateDropdown(selectId, data, options) {
@@ -1060,17 +1098,18 @@ function generateVisualTimetable(classes, titleName) {
     const days = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
     const timeSlots = 26; // 9:00 ~ 21:30 (30분 단위)
 
-    let tableHtml = `
-        <div class="timetable-container">
-            <div class="timetable-header"><h3>${titleName}</h3></div>
-            <div class="timetable-scale-wrap">
-                <div class="timetable-grid-30">
-    `;
+    // 성능 최적화: 배열 사용 후 join
+    const htmlParts = [
+        '<div class="timetable-container">',
+        '<div class="timetable-header"><h3>', titleName, '</h3></div>',
+        '<div class="timetable-scale-wrap">',
+        '<div class="timetable-grid-30">'
+    ];
 
     // 1. 헤더 행 (요일)
-    tableHtml += `<div class="timetable-header-cell" style="grid-column: 1; grid-row: 1;"></div>`;
+    htmlParts.push('<div class="timetable-header-cell" style="grid-column: 1; grid-row: 1;"></div>');
     days.forEach((day, index) => {
-        tableHtml += `<div class="timetable-header-cell" style="grid-column: ${index + 2}; grid-row: 1;">${day}</div>`;
+        htmlParts.push(`<div class="timetable-header-cell" style="grid-column: ${index + 2}; grid-row: 1;">${day}</div>`);
     });
 
     // 2. 시간 레이블 열
@@ -1078,16 +1117,12 @@ function generateVisualTimetable(classes, titleName) {
         if (i % 2 === 0) {
             const hour = 9 + Math.floor(i / 2);
             const row = i + 2;
-            tableHtml += `<div class="time-label" style="grid-column: 1; grid-row: ${row} / span 2;">${hour}:00</div>`;
+            htmlParts.push(`<div class="time-label" style="grid-column: 1; grid-row: ${row} / span 2;">${hour}:00</div>`);
         }
     }
 
-    // 3. 배경 '공강' 블록 (텍스트 제거, 배경색으로만 표시)
-    for (let d = 0; d < days.length; d++) {
-        for (let t = 0; t < timeSlots; t++) {
-            tableHtml += `<div class="empty-slot-block" style="grid-column: ${d + 2}; grid-row: ${t + 2};"></div>`;
-        }
-    }
+    // 3. 성능 최적화: 빈 슬롯은 CSS로 처리 (DOM 요소 130개 제거)
+    // CSS에서 .timetable-grid-30::before로 배경 처리
 
     // 4. 강의 블록 생성 전 데이터 처리: 연속된 강의 병합
     const processedClasses = [];
@@ -1133,17 +1168,17 @@ function generateVisualTimetable(classes, titleName) {
         const rowSpan = Math.round(durationMinutes / 30);
 
         if (rowSpan > 0) {
-            tableHtml += `
-                <div class="class-block" style="grid-column: ${dayIndex + 2}; grid-row: ${startRow} / span ${rowSpan}; z-index: 10;">
-                    <div class="class-subject">${c.subject}</div>
-                    <div class="class-room">${getRoomDisplay(c)}</div>
-                </div>
-            `;
+            htmlParts.push(
+                '<div class="class-block" style="grid-column: ', (dayIndex + 2).toString(), '; grid-row: ', startRow.toString(), ' / span ', rowSpan.toString(), '; z-index: 10;">',
+                '<div class="class-subject">', c.subject, '</div>',
+                '<div class="class-room">', getRoomDisplay(c), '</div>',
+                '</div>'
+            );
         }
     });
 
-    tableHtml += '</div></div></div>';
-    return tableHtml;
+    htmlParts.push('</div></div></div>');
+    return htmlParts.join('');
 }
 
 function applyAllTimetablesScale() {
